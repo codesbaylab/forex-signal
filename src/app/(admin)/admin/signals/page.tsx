@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { PageHeader } from '@/components/ui/page-header'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
+import SeedSignalsButton from './SeedSignalsButton'
 
 export default async function AdminSignalsPage() {
   const supabase = await createClient()
@@ -31,9 +32,12 @@ export default async function AdminSignalsPage() {
         title="Signals"
         subtitle={`${signals.length} signals total`}
         actions={
-          <Link href="/admin/signals/new">
-            <Button className="bg-brand-700 hover:bg-brand-800 text-white">New Signal</Button>
-          </Link>
+          <div className="flex items-center gap-2">
+            {signals.length === 0 && <SeedSignalsButton />}
+            <Link href="/admin/signals/new">
+              <Button className="bg-brand-700 hover:bg-brand-800 text-white">New Signal</Button>
+            </Link>
+          </div>
         }
       />
       <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
