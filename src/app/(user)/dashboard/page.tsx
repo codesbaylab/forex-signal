@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { PageHeader } from '@/components/ui/page-header'
 import { StatCard } from '@/components/ui/stat-card'
-import { Wallet, TrendingUp, DollarSign, Activity } from 'lucide-react'
+import { TrendingUp, DollarSign, Activity, ArrowDownToLine, ArrowUpFromLine, ArrowLeftRight } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 
@@ -21,8 +21,13 @@ export default async function DashboardPage() {
   })
   if (!profile) redirect('/auth/login')
 
-  const totalBalance = profile.wallets.reduce((sum, w) => sum + Number(w.balance), 0)
   const activeSubscription = profile.subscriptions[0] ?? null
+
+  const currencyMeta: Record<string, { label: string; symbol: string; color: string; decimals: number }> = {
+    USDT_TRC20: { label: 'USDT (TRC20)', symbol: '₮', color: 'text-emerald-600', decimals: 2 },
+    BTC:         { label: 'Bitcoin',      symbol: '₿', color: 'text-orange-500',  decimals: 6 },
+    BNB_BEP20:   { label: 'BNB (BEP20)', symbol: 'B', color: 'text-yellow-500',  decimals: 4 },
+  }
 
   const activeSignals = await prisma.signal.count({ where: { status: 'ACTIVE' } })
 
@@ -58,9 +63,60 @@ export default async function DashboardPage() {
     <div>
       <PageHeader title="Dashboard" subtitle="Your trading overview" />
 
+      {/* Wallet Balances */}
+      <div className="bg-white rounded-2xl border border-gray-100 p-5 mb-4">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="font-bold text-gray-900">Wallet Balances</h2>
+            <p className="text-xs text-gray-400 mt-0.5">Your multi-currency holdings</p>
+          </div>
+          <Link href="/wallet"><Button variant="ghost" className="text-brand-600 text-xs h-7 px-3">View Wallet</Button></Link>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {profile.wallets.map((wallet) => {
+            const meta = currencyMeta[wallet.currency] ?? { label: wallet.currency, symbol: '$', color: 'text-gray-700', decimals: 4 }
+            const bal = Number(wallet.balance)
+            return (
+              <div key={wallet.id} className="bg-gray-50 rounded-xl p-4 flex flex-col gap-3">
+                <div className="flex items-center gap-2">
+                  <div className={`w-8 h-8 rounded-full bg-white border border-gray-200 flex items-center justify-center text-sm font-bold ${meta.color}`}>
+                    {meta.symbol}
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-gray-700">{meta.label}</p>
+                    <p className="text-xs text-gray-400">{wallet.currency}</p>
+                  </div>
+                </div>
+                <p className="text-xl font-extrabold text-gray-900 tabular-nums">
+                  {bal.toFixed(meta.decimals)}
+                </p>
+                <div className="flex items-center gap-2 mt-1">
+                  <Link href="/deposit">
+                    <button className="flex items-center gap-1 text-xs text-brand-700 font-medium hover:underline">
+                      <ArrowDownToLine className="w-3 h-3" /> Deposit
+                    </button>
+                  </Link>
+                  <span className="text-gray-200">|</span>
+                  <Link href="/withdraw">
+                    <button className="flex items-center gap-1 text-xs text-gray-500 font-medium hover:underline">
+                      <ArrowUpFromLine className="w-3 h-3" /> Withdraw
+                    </button>
+                  </Link>
+                  <span className="text-gray-200">|</span>
+                  <Link href="/transfer">
+                    <button className="flex items-center gap-1 text-xs text-gray-500 font-medium hover:underline">
+                      <ArrowLeftRight className="w-3 h-3" /> Transfer
+                    </button>
+                  </Link>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+
       {/* Stat Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-7">
-        <StatCard title="Wallet Balance" value={`$${totalBalance.toFixed(2)}`} featured change="Multi-currency" changePositive icon={Wallet} />
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-7">
         <StatCard title="Active Signals" value={activeSignals} change="Live right now" changePositive icon={Activity} />
         <StatCard title="Win Rate" value={`${winRate}%`} change={`${allSignals.length} total signals`} changePositive icon={TrendingUp} />
         <StatCard title="Commissions" value={`$${commissionEarned}`} change="Total earned" changePositive icon={DollarSign} />
