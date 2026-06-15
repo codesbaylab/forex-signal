@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ForexSignal — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --green-900: #0d3d22;
+    --green-800: #145a32;
+    --green-700: #1a6b3c;
+    --green-600: #1e8449;
+    --green-500: #27ae60;
+    --green-400: #2ecc71;
+    --green-100: #d5f5e3;
+    --green-50:  #eafaf1;
+    --gray-900: #111827;
+    --gray-700: #374151;
+    --gray-500: #6b7280;
+    --gray-300: #d1d5db;
+    --gray-100: #f3f4f6;
+    --gray-50:  #f9fafb;
+    --white: #ffffff;
+    --red: #ef4444;
+    --orange: #f97316;
+    --blue: #3b82f6;
+    --sidebar-w: 240px;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--gray-100);
+    color: var(--gray-900);
+    display: flex;
+    min-height: 100vh;
+    font-size: 14px;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: var(--sidebar-w);
+    background: var(--white);
+    height: 100vh;
+    position: fixed;
+    left: 0; top: 0;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--gray-100);
+    z-index: 10;
+  }
+
+  .sidebar-logo {
+    padding: 24px 20px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid var(--gray-100);
+  }
+
+  .logo-icon {
+    width: 36px; height: 36px;
+    background: var(--green-700);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .logo-icon svg { width: 20px; height: 20px; fill: white; }
+
+  .logo-text {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--gray-900);
+    letter-spacing: -0.3px;
+  }
+
+  .sidebar-section-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--gray-500);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 20px 20px 8px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    margin: 1px 10px;
+    border-radius: 10px;
+    cursor: pointer;
+    color: var(--gray-500);
+    font-weight: 500;
+    font-size: 13.5px;
+    transition: all 0.15s;
+    position: relative;
+  }
+
+  .nav-item:hover { background: var(--gray-50); color: var(--gray-900); }
+
+  .nav-item.active {
+    background: var(--green-50);
+    color: var(--green-700);
+    font-weight: 600;
+  }
+
+  .nav-item.active::before {
+    content: '';
+    position: absolute;
+    left: -10px; top: 50%;
+    transform: translateY(-50%);
+    width: 4px; height: 60%;
+    background: var(--green-700);
+    border-radius: 0 4px 4px 0;
+  }
+
+  .nav-icon { width: 18px; height: 18px; flex-shrink: 0; }
+
+  .nav-badge {
+    margin-left: auto;
+    background: var(--green-700);
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 20px;
+  }
+
+  .sidebar-bottom {
+    margin-top: auto;
+    padding: 16px;
+  }
+
+  .upgrade-card {
+    background: linear-gradient(135deg, var(--green-900), var(--green-700));
+    border-radius: 16px;
+    padding: 18px;
+    color: white;
+  }
+
+  .upgrade-card h4 { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+  .upgrade-card p { font-size: 11px; opacity: 0.75; margin-bottom: 14px; line-height: 1.4; }
+
+  .upgrade-btn {
+    background: white;
+    color: var(--green-800);
+    border: none;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    width: 100%;
+  }
+
+  /* ── MAIN ── */
+  .main {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  /* ── TOPBAR ── */
+  .topbar {
+    background: var(--white);
+    border-bottom: 1px solid var(--gray-100);
+    padding: 0 28px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: sticky; top: 0; z-index: 9;
+  }
+
+  .search-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--gray-50);
+    border: 1px solid var(--gray-100);
+    border-radius: 10px;
+    padding: 8px 14px;
+    flex: 1;
+    max-width: 320px;
+    color: var(--gray-500);
+    font-size: 13px;
+  }
+
+  .search-box input {
+    border: none; background: none; outline: none;
+    font-size: 13px; color: var(--gray-700);
+    font-family: 'Inter', sans-serif;
+    width: 100%;
+  }
+
+  .topbar-spacer { flex: 1; }
+
+  .topbar-actions { display: flex; align-items: center; gap: 12px; }
+
+  .icon-btn {
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    border: 1px solid var(--gray-200);
+    background: var(--white);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    position: relative;
+    color: var(--gray-500);
+  }
+
+  .icon-btn .dot {
+    position: absolute; top: 7px; right: 7px;
+    width: 8px; height: 8px;
+    background: var(--red);
+    border-radius: 50%;
+    border: 2px solid white;
+  }
+
+  .user-chip {
+    display: flex; align-items: center; gap: 10px;
+    padding: 4px 4px 4px 12px;
+    border: 1px solid var(--gray-200);
+    border-radius: 40px;
+    cursor: pointer;
+  }
+
+  .user-chip span { font-size: 13px; font-weight: 600; }
+
+  .avatar {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-weight: 700; font-size: 13px;
+    flex-shrink: 0;
+  }
+
+  /* ── CONTENT ── */
+  .content {
+    padding: 28px;
+    flex: 1;
+  }
+
+  .page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 24px;
+  }
+
+  .page-header h1 { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; }
+  .page-header p { font-size: 13px; color: var(--gray-500); margin-top: 3px; }
+
+  .header-actions { display: flex; gap: 10px; }
+
+  .btn-primary {
+    background: var(--green-700);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 6px;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .btn-outline {
+    background: white;
+    color: var(--gray-700);
+    border: 1px solid var(--gray-300);
+    border-radius: 10px;
+    padding: 10px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* ── STAT CARDS ── */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .stat-card {
+    background: var(--white);
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid var(--gray-100);
+    cursor: pointer;
+    transition: box-shadow 0.2s;
+  }
+
+  .stat-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
+
+  .stat-card.featured {
+    background: linear-gradient(135deg, var(--green-800), var(--green-600));
+    color: white;
+    border: none;
+  }
+
+  .stat-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--gray-500);
+    margin-bottom: 8px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+
+  .stat-card.featured .stat-label { color: rgba(255,255,255,0.75); }
+
+  .stat-value {
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin-bottom: 10px;
+  }
+
+  .stat-sub {
+    font-size: 11.5px;
+    color: var(--gray-500);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .stat-card.featured .stat-sub { color: rgba(255,255,255,0.7); }
+
+  .stat-sub .up { color: var(--green-500); font-weight: 600; }
+  .stat-card.featured .stat-sub .up { color: rgba(255,255,255,0.9); font-weight: 700; }
+
+  .arrow-btn {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    border: 1px solid var(--gray-200);
+    background: var(--white);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    color: var(--gray-500);
+    font-size: 12px;
+  }
+
+  .stat-card.featured .arrow-btn {
+    border-color: rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.15);
+    color: white;
+  }
+
+  /* ── MIDDLE GRID ── */
+  .middle-grid {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .card {
+    background: var(--white);
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid var(--gray-100);
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+  }
+
+  .card-title {
+    font-size: 15px;
+    font-weight: 700;
+  }
+
+  .card-subtitle {
+    font-size: 11.5px;
+    color: var(--gray-500);
+    margin-top: 2px;
+  }
+
+  /* signal performance tabs */
+  .tab-group {
+    display: flex;
+    background: var(--gray-100);
+    border-radius: 8px;
+    padding: 3px;
+    gap: 2px;
+  }
+
+  .tab {
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--gray-500);
+  }
+
+  .tab.active { background: white; color: var(--green-700); }
+
+  /* active signal panel */
+  .active-signal-panel {
+    background: var(--white);
+    border-radius: 16px;
+    border: 1px solid var(--gray-100);
+    overflow: hidden;
+  }
+
+  .signal-alert-header {
+    background: linear-gradient(135deg, var(--green-800), var(--green-600));
+    padding: 18px 20px;
+    color: white;
+  }
+
+  .signal-alert-header .label {
+    font-size: 10.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    opacity: 0.8;
+    margin-bottom: 6px;
+    display: flex; align-items: center; gap: 6px;
+  }
+
+  .live-dot {
+    width: 7px; height: 7px;
+    background: #4caf50;
+    border-radius: 50%;
+    animation: pulse 1.5s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.3); }
+  }
+
+  .signal-pair {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    margin-bottom: 4px;
+  }
+
+  .signal-dir {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 14px;
+  }
+
+  .signal-levels {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+
+  .signal-level-item { }
+  .signal-level-item .lvl-label { font-size: 10px; opacity: 0.7; margin-bottom: 2px; }
+  .signal-level-item .lvl-value { font-size: 13px; font-weight: 700; }
+
+  .signal-alert-body { padding: 16px 20px; }
+
+  .signal-detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--gray-100);
+    font-size: 13px;
+  }
+
+  .signal-detail-row:last-child { border-bottom: none; }
+  .signal-detail-row .lbl { color: var(--gray-500); font-weight: 500; }
+  .signal-detail-row .val { font-weight: 600; }
+  .signal-detail-row .val.green { color: var(--green-600); }
+  .signal-detail-row .val.red { color: var(--red); }
+
+  .close-signal-btn {
+    width: 100%;
+    background: var(--green-700);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 11px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 14px;
+    font-family: 'Inter', sans-serif;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+
+  /* ── BOTTOM GRID ── */
+  .bottom-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 300px;
+    gap: 16px;
+  }
+
+  /* recent signals table */
+  .signal-row {
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--gray-50);
+    gap: 12px;
+  }
+
+  .signal-row:last-child { border-bottom: none; }
+
+  .pair-icon {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    font-weight: 800;
+    flex-shrink: 0;
+  }
+
+  .pair-icon.buy { background: var(--green-50); color: var(--green-700); }
+  .pair-icon.sell { background: #fef2f2; color: var(--red); }
+
+  .signal-info { flex: 1; }
+  .signal-info .pair-name { font-size: 13px; font-weight: 700; }
+  .signal-info .timeframe { font-size: 11px; color: var(--gray-500); margin-top: 1px; }
+
+  .signal-pips { text-align: right; }
+  .signal-pips .pips { font-size: 13px; font-weight: 700; }
+  .signal-pips .pips.win { color: var(--green-600); }
+  .signal-pips .pips.loss { color: var(--red); }
+  .signal-pips .status-txt { font-size: 10px; color: var(--gray-500); margin-top: 1px; }
+
+  .badge {
+    padding: 3px 9px;
+    border-radius: 20px;
+    font-size: 10.5px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .badge.win { background: var(--green-50); color: var(--green-700); }
+  .badge.loss { background: #fef2f2; color: var(--red); }
+  .badge.active { background: #eff6ff; color: var(--blue); }
+  .badge.buy { background: var(--green-50); color: var(--green-700); }
+  .badge.sell { background: #fef2f2; color: var(--red); }
+
+  /* referral card */
+  .referral-stat {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--gray-50);
+  }
+
+  .referral-stat:last-child { border-bottom: none; }
+  .referral-stat .r-label { font-size: 12.5px; color: var(--gray-500); }
+  .referral-stat .r-value { font-size: 13px; font-weight: 700; }
+
+  .level-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-size: 12px;
+  }
+
+  .level-bar .lvl-name { width: 46px; color: var(--gray-500); font-weight: 600; }
+  .level-bar .bar-track {
+    flex: 1; height: 7px;
+    background: var(--gray-100);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .level-bar .bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--green-600), var(--green-400));
+    border-radius: 10px;
+  }
+
+  .level-bar .lvl-count { width: 28px; text-align: right; font-weight: 700; color: var(--gray-700); }
+
+  /* market sessions */
+  .session-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--gray-50);
+    font-size: 12.5px;
+  }
+
+  .session-item:last-child { border-bottom: none; }
+
+  .session-dot {
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    margin-right: 8px;
+    display: inline-block;
+  }
+
+  .session-dot.open { background: var(--green-500); box-shadow: 0 0 0 3px var(--green-100); }
+  .session-dot.closed { background: var(--gray-300); }
+
+  .session-name { display: flex; align-items: center; font-weight: 600; }
+  .session-time { color: var(--gray-500); font-size: 11.5px; }
+  .session-status { font-weight: 700; font-size: 11px; }
+  .session-status.open { color: var(--green-600); }
+  .session-status.closed { color: var(--gray-400); }
+
+  /* donut wrapper */
+  .donut-wrap {
+    position: relative;
+    width: 110px; height: 110px;
+    margin: 0 auto 16px;
+  }
+
+  .donut-center {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+  }
+
+  .donut-center .pct { font-size: 20px; font-weight: 800; color: var(--green-700); }
+  .donut-center .pct-label { font-size: 9px; color: var(--gray-500); font-weight: 600; }
+
+  .win-loss-row {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 14px;
+  }
+
+  .wl-item { text-align: center; }
+  .wl-item .wl-val { font-size: 16px; font-weight: 800; }
+  .wl-item .wl-val.green { color: var(--green-600); }
+  .wl-item .wl-val.red { color: var(--red); }
+  .wl-item .wl-lbl { font-size: 10.5px; color: var(--gray-500); margin-top: 2px; }
+
+  .legend-row {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 12px;
+  }
+
+  .legend-item {
+    display: flex; align-items: center; gap: 5px;
+    font-size: 11px; color: var(--gray-500); font-weight: 500;
+  }
+
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  svg { display: block; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24"><path d="M3 3h7v7H3zm11 0h7v7h-7zM3 14h7v7H3zm14 3a4 4 0 1 1-4-4 4 4 0 0 1 4 4z"/></svg>
+    </div>
+    <span class="logo-text">ForexSignal</span>
+  </div>
+
+  <div class="sidebar-section-label">Menu</div>
+
+  <div class="nav-item active">
+    <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    Dashboard
+  </div>
+
+  <div class="nav-item">
+    <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+    Signals
+    <span class="nav-badge">5</span>
+  </div>
+
+  <div class="nav-item">
+    <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+    Wallet
+  </div>
+
+  <div class="nav-item">
+    <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+    Deposit
+  </div>
+
+  <div class="nav-item">
+    <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    Referral
+  </div>
+
+  <div class="nav-item">
+    <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+    Subscription
+  </div>
+
+  <div class="sidebar-section-label">General</div>
+
+  <div class="nav-item">
+    <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+    Settings
+  </div>
+
+  <div class="nav-item">
+    <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    Support
+  </div>
+
+  <div class="nav-item">
+    <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    Logout
+  </div>
+
+  <div class="sidebar-bottom">
+    <div class="upgrade-card">
+      <h4>Upgrade to Pro</h4>
+      <p>Get real-time signals on all pairs and unlimited history.</p>
+      <button class="upgrade-btn">Upgrade Now</button>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="search-box">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" placeholder="Search signals, pairs..." />
+      <span style="font-size:11px;color:var(--gray-300);border:1px solid var(--gray-200);border-radius:5px;padding:2px 6px;font-family:monospace;">⌘F</span>
+    </div>
+
+    <div class="topbar-spacer"></div>
+
+    <div class="topbar-actions">
+      <div class="icon-btn">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      </div>
+
+      <div class="icon-btn">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="dot"></span>
+      </div>
+
+      <div class="user-chip">
+        <span>Aghilraj</span>
+        <div class="avatar">AG</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+      <div>
+        <h1>Dashboard</h1>
+        <p>Welcome back, Aghilraj. Here's what's happening today.</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn-outline">Export Report</button>
+        <button class="btn-primary">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Deposit Funds
+        </button>
+      </div>
+    </div>
+
+    <!-- STAT CARDS -->
+    <div class="stat-grid">
+
+      <div class="stat-card featured">
+        <div class="stat-label">
+          Wallet Balance
+          <div class="arrow-btn">↗</div>
+        </div>
+        <div class="stat-value">$2,840.50</div>
+        <div class="stat-sub">
+          <span style="font-size:13px;">↑</span>
+          <span class="up">+$320 this week</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-label">
+          Active Signals
+          <div class="arrow-btn" style="border-color:var(--gray-200);">↗</div>
+        </div>
+        <div class="stat-value">5</div>
+        <div class="stat-sub">
+          <span style="color:var(--green-500);font-size:13px;">↑</span>
+          <span class="up" style="color:var(--green-600);">3 new today</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-label">
+          Win Rate
+          <div class="arrow-btn" style="border-color:var(--gray-200);">↗</div>
+        </div>
+        <div class="stat-value">74%</div>
+        <div class="stat-sub">
+          <span style="color:var(--green-500);font-size:13px;">↑</span>
+          <span style="color:var(--green-600);font-weight:600;">+2% vs last month</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-label">
+          Commission Earned
+          <div class="arrow-btn" style="border-color:var(--gray-200);">↗</div>
+        </div>
+        <div class="stat-value">$480</div>
+        <div class="stat-sub">
+          <span style="color:var(--green-500);font-size:13px;">↑</span>
+          <span style="color:var(--green-600);font-weight:600;">12 referrals active</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- MIDDLE GRID: Chart + Active Signal -->
+    <div class="middle-grid">
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Signal Performance</div>
+            <div class="card-subtitle">Weekly wins vs losses</div>
+          </div>
+          <div class="tab-group">
+            <div class="tab active">Week</div>
+            <div class="tab">Month</div>
+            <div class="tab">Year</div>
+          </div>
+        </div>
+        <canvas id="perfChart" height="110"></canvas>
+      </div>
+
+      <div class="active-signal-panel">
+        <div class="signal-alert-header">
+          <div class="label">
+            <span class="live-dot"></span>
+            Live Signal
+          </div>
+          <div class="signal-pair">EUR/USD</div>
+          <div class="signal-dir">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+            BUY
+          </div>
+          <div class="signal-levels">
+            <div class="signal-level-item">
+              <div class="lvl-label">Entry</div>
+              <div class="lvl-value">1.08420</div>
+            </div>
+            <div class="signal-level-item">
+              <div class="lvl-label">Take Profit</div>
+              <div class="lvl-value" style="color:#a8f0c4;">1.08950</div>
+            </div>
+            <div class="signal-level-item">
+              <div class="lvl-label">Stop Loss</div>
+              <div class="lvl-value" style="color:#fca5a5;">1.08100</div>
+            </div>
+          </div>
+        </div>
+        <div class="signal-alert-body">
+          <div class="signal-detail-row">
+            <span class="lbl">Timeframe</span>
+            <span class="val">H4</span>
+          </div>
+          <div class="signal-detail-row">
+            <span class="lbl">Risk/Reward</span>
+            <span class="val green">1 : 2.5</span>
+          </div>
+          <div class="signal-detail-row">
+            <span class="lbl">Pips Target</span>
+            <span class="val green">+53 pips</span>
+          </div>
+          <div class="signal-detail-row">
+            <span class="lbl">Signal Age</span>
+            <span class="val">2h 14m ago</span>
+          </div>
+          <div class="signal-detail-row">
+            <span class="lbl">Status</span>
+            <span class="val" style="color:var(--blue);">Running</span>
+          </div>
+          <button class="close-signal-btn">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/></svg>
+            View Full Signal
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- BOTTOM GRID -->
+    <div class="bottom-grid">
+
+      <!-- Recent Signals -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Recent Signals</div>
+            <div class="card-subtitle">Last 7 days</div>
+          </div>
+          <button class="btn-outline" style="padding:6px 12px;font-size:12px;">View All</button>
+        </div>
+
+        <div class="signal-row">
+          <div class="pair-icon buy">BUY</div>
+          <div class="signal-info">
+            <div class="pair-name">GBP/USD</div>
+            <div class="timeframe">H1 · 14 Jun 2026</div>
+          </div>
+          <div class="signal-pips">
+            <div class="pips win">+38 pips</div>
+            <div class="status-txt">TP Hit</div>
+          </div>
+          <span class="badge win">WIN</span>
+        </div>
+
+        <div class="signal-row">
+          <div class="pair-icon sell">SELL</div>
+          <div class="signal-info">
+            <div class="pair-name">USD/JPY</div>
+            <div class="timeframe">H4 · 13 Jun 2026</div>
+          </div>
+          <div class="signal-pips">
+            <div class="pips loss">-22 pips</div>
+            <div class="status-txt">SL Hit</div>
+          </div>
+          <span class="badge loss">LOSS</span>
+        </div>
+
+        <div class="signal-row">
+          <div class="pair-icon buy">BUY</div>
+          <div class="signal-info">
+            <div class="pair-name">EUR/USD</div>
+            <div class="timeframe">H4 · Now</div>
+          </div>
+          <div class="signal-pips">
+            <div class="pips" style="color:var(--blue);">+21 pips</div>
+            <div class="status-txt">Running</div>
+          </div>
+          <span class="badge active">LIVE</span>
+        </div>
+
+        <div class="signal-row">
+          <div class="pair-icon sell">SELL</div>
+          <div class="signal-info">
+            <div class="pair-name">XAU/USD</div>
+            <div class="timeframe">D1 · 12 Jun 2026</div>
+          </div>
+          <div class="signal-pips">
+            <div class="pips win">+94 pips</div>
+            <div class="status-txt">TP Hit</div>
+          </div>
+          <span class="badge win">WIN</span>
+        </div>
+
+        <div class="signal-row">
+          <div class="pair-icon buy">BUY</div>
+          <div class="signal-info">
+            <div class="pair-name">AUD/USD</div>
+            <div class="timeframe">M15 · 11 Jun 2026</div>
+          </div>
+          <div class="signal-pips">
+            <div class="pips win">+18 pips</div>
+            <div class="status-txt">TP Hit</div>
+          </div>
+          <span class="badge win">WIN</span>
+        </div>
+
+      </div>
+
+      <!-- Win Rate Donut + Referral -->
+      <div style="display:flex;flex-direction:column;gap:16px;">
+
+        <div class="card" style="flex:1;">
+          <div class="card-header">
+            <div class="card-title">Win Rate</div>
+            <span style="font-size:11px;color:var(--gray-500);">This month</span>
+          </div>
+          <div class="donut-wrap">
+            <canvas id="donutChart" width="110" height="110"></canvas>
+            <div class="donut-center">
+              <div class="pct">74%</div>
+              <div class="pct-label">WIN RATE</div>
+            </div>
+          </div>
+          <div class="win-loss-row">
+            <div class="wl-item">
+              <div class="wl-val green">37</div>
+              <div class="wl-lbl">Wins</div>
+            </div>
+            <div class="wl-item" style="border-left:1px solid var(--gray-100);border-right:1px solid var(--gray-100);padding:0 20px;">
+              <div class="wl-val" style="color:var(--gray-400);">3</div>
+              <div class="wl-lbl">B/E</div>
+            </div>
+            <div class="wl-item">
+              <div class="wl-val red">10</div>
+              <div class="wl-lbl">Losses</div>
+            </div>
+          </div>
+          <div class="legend-row">
+            <div class="legend-item"><div class="legend-dot" style="background:var(--green-500);"></div> Wins</div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--gray-200);"></div> B/E</div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--red);"></div> Loss</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Referral + Market Sessions -->
+      <div style="display:flex;flex-direction:column;gap:16px;">
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Referral Levels</div>
+            <span style="font-size:11px;color:var(--green-600);font-weight:600;">$480 earned</span>
+          </div>
+
+          <div class="level-bar">
+            <div class="lvl-name">Level 1</div>
+            <div class="bar-track"><div class="bar-fill" style="width:80%;"></div></div>
+            <div class="lvl-count">8</div>
+          </div>
+          <div class="level-bar">
+            <div class="lvl-name">Level 2</div>
+            <div class="bar-track"><div class="bar-fill" style="width:40%;"></div></div>
+            <div class="lvl-count">4</div>
+          </div>
+          <div class="level-bar">
+            <div class="lvl-name">Level 3</div>
+            <div class="bar-track"><div class="bar-fill" style="width:20%;"></div></div>
+            <div class="lvl-count">2</div>
+          </div>
+          <div class="level-bar" style="margin-bottom:0;">
+            <div class="lvl-name">Level 4</div>
+            <div class="bar-track"><div class="bar-fill" style="width:10%;"></div></div>
+            <div class="lvl-count">1</div>
+          </div>
+
+          <div style="border-top:1px solid var(--gray-100);margin-top:12px;padding-top:12px;">
+            <div class="referral-stat">
+              <span class="r-label">Total Referrals</span>
+              <span class="r-value">15</span>
+            </div>
+            <div class="referral-stat">
+              <span class="r-label">Active Subs</span>
+              <span class="r-value" style="color:var(--green-600);">12</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Market Sessions</div>
+          </div>
+          <div class="session-item">
+            <div class="session-name"><span class="session-dot open"></span>London</div>
+            <div class="session-time">08:00 – 17:00 GMT</div>
+            <div class="session-status open">Open</div>
+          </div>
+          <div class="session-item">
+            <div class="session-name"><span class="session-dot open"></span>New York</div>
+            <div class="session-time">13:00 – 22:00 GMT</div>
+            <div class="session-status open">Open</div>
+          </div>
+          <div class="session-item">
+            <div class="session-name"><span class="session-dot closed"></span>Tokyo</div>
+            <div class="session-time">00:00 – 09:00 GMT</div>
+            <div class="session-status closed">Closed</div>
+          </div>
+          <div class="session-item">
+            <div class="session-name"><span class="session-dot closed"></span>Sydney</div>
+            <div class="session-time">22:00 – 07:00 GMT</div>
+            <div class="session-status closed">Closed</div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+// Performance Bar Chart
+const perfCtx = document.getElementById('perfChart').getContext('2d');
+new Chart(perfCtx, {
+  type: 'bar',
+  data: {
+    labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+    datasets: [
+      {
+        label: 'Wins',
+        data: [3, 5, 7, 6, 4, 8, 4],
+        backgroundColor: '#1e8449',
+        borderRadius: 8,
+        borderSkipped: false,
+      },
+      {
+        label: 'Losses',
+        data: [1, 2, 1, 2, 1, 1, 2],
+        backgroundColor: '#f3f4f6',
+        borderRadius: 8,
+        borderSkipped: false,
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#111827',
+        padding: 10,
+        cornerRadius: 8,
+        titleFont: { family: 'Inter', size: 12 },
+        bodyFont: { family: 'Inter', size: 12 },
+      }
+    },
+    scales: {
+      x: {
+        grid: { display: false },
+        border: { display: false },
+        ticks: { font: { family: 'Inter', size: 11 }, color: '#9ca3af' }
+      },
+      y: {
+        grid: { color: '#f3f4f6', drawBorder: false },
+        border: { display: false, dash: [4,4] },
+        ticks: { font: { family: 'Inter', size: 11 }, color: '#9ca3af', stepSize: 2 },
+        beginAtZero: true
+      }
+    },
+    barPercentage: 0.55,
+    categoryPercentage: 0.7,
+  }
+});
+
+// Win Rate Donut
+const donutCtx = document.getElementById('donutChart').getContext('2d');
+new Chart(donutCtx, {
+  type: 'doughnut',
+  data: {
+    datasets: [{
+      data: [74, 6, 20],
+      backgroundColor: ['#1e8449', '#e5e7eb', '#ef4444'],
+      borderWidth: 0,
+      hoverOffset: 4,
+    }]
+  },
+  options: {
+    responsive: false,
+    cutout: '72%',
+    plugins: {
+      legend: { display: false },
+      tooltip: { enabled: false }
+    },
+    animation: { animateRotate: true, duration: 1000 }
+  }
+});
+</script>
+</body>
+</html>

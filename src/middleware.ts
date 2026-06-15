@@ -1,0 +1,67 @@
+import { type NextRequest, NextResponse } from 'next/server'
+import { createServerClient } from '@supabase/ssr'
+
+const PUBLIC_PATHS = ['/', '/auth/login', '/auth/register', '/auth/forgot-password', '/auth/reset-password', '/auth/callback', '/maintenance']
+const ADMIN_PATHS = ['/admin']
+
+export async function middleware(request: NextRequest) {
+  let supabaseResponse = NextResponse.next({ request })
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll()
+        },
+        setAll(cookiesToSet: { name: string; value: string; options?: Record<string, unknown> }[]) {
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
+          supabaseResponse = NextResponse.next({ request })
+          cookiesToSet.forEach(({ name, value, options }) =>
+            supabaseResponse.cookies.set(name, value, options)
+          )
+        },
+      },
+    }
+  )
+
+  const { data: { user } } = await supabase.auth.getUser()
+
+  const path = request.nextUrl.pathname
+  const isPublicPath = PUBLIC_PATHS.some((p) => path === p || path.startsWith('/auth/'))
+  const isAdminPath = ADMIN_PATHS.some((p) => path.startsWith(p))
+  const isApiPath = path.startsWith('/api/')
+  const isWebhookPath = path.startsWith('/api/webhooks/')
+
+  // Allow public paths and API routes
+  if (isPublicPath || isApiPath) return supabaseResponse
+
+  // Unauthenticated — redirect to login
+  if (!user) {
+    const loginUrl = new URL('/auth/login', request.url)
+    loginUrl.searchParams.set('redirect', path)
+    return NextResponse.redirect(loginUrl)
+  }
+
+  // Admin path check — verify role in DB
+  if (isAdminPath && !isWebhookPath) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role, is_banned')
+      .eq('id', user.id)
+      .single()
+
+    if (!profile || profile.role !== 'ADMIN') {
+      return NextResponse.redirect(new URL('/dashboard', request.url))
+    }
+  }
+
+  return supabaseResponse
+}
+
+export const config = {
+  matcher: [
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+  ],
+}
