@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+/* NProgress bar */
+#nprogress .bar { background: #1a6b3c !important; height: 3px !important; }
+#nprogress .peg { box-shadow: 0 0 10px #1a6b3c, 0 0 5px #1a6b3c !important; }
+#nprogress .spinner { display: none !important; }
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 @layer base {
