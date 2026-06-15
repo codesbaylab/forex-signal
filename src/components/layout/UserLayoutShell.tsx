@@ -1,15 +1,15 @@
 'use client'
 import { useState } from 'react'
+import UserSidebar from './UserSidebar'
 import Topbar from './Topbar'
 import type { Profile } from '@/types'
 
-interface LayoutShellProps {
-  sidebar: (onClose: () => void) => React.ReactNode
+interface Props {
   user: Pick<Profile, 'id' | 'name' | 'email' | 'avatarUrl'>
   children: React.ReactNode
 }
 
-export default function LayoutShell({ sidebar, user, children }: LayoutShellProps) {
+export default function UserLayoutShell({ user, children }: Props) {
   const [open, setOpen] = useState(false)
 
   return (
@@ -22,20 +22,18 @@ export default function LayoutShell({ sidebar, user, children }: LayoutShellProp
         />
       )}
 
-      {/* Sidebar drawer */}
+      {/* Sidebar */}
       <div
         className={`fixed left-0 top-0 h-screen w-60 z-30 transition-transform duration-300 ease-in-out
           ${open ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}
       >
-        {sidebar(() => setOpen(false))}
+        <UserSidebar onClose={() => setOpen(false)} />
       </div>
 
-      {/* Main content */}
+      {/* Main */}
       <div className="lg:ml-60 flex flex-col min-h-screen">
         <Topbar user={user} onMenuClick={() => setOpen(true)} />
-        <main className="flex-1 p-4 lg:p-7">
-          {children}
-        </main>
+        <main className="flex-1 p-4 lg:p-7">{children}</main>
       </div>
     </div>
   )
