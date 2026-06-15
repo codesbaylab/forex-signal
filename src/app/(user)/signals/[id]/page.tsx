@@ -22,7 +22,11 @@ export default async function SignalDetailPage({ params }: { params: Promise<{ i
     DRAFT: 'bg-yellow-50 text-yellow-700',
   }
 
-  const takeProfits = Array.isArray(signal.takeProfits) ? (signal.takeProfits as { level: number; price: number }[]) : []
+  const takeProfits = Array.isArray(signal.takeProfits)
+    ? (signal.takeProfits as (number | { level: number; price: number })[]).map((tp, i) =>
+        typeof tp === 'number' ? { level: i + 1, price: tp } : tp
+      )
+    : []
 
   return (
     <div>
@@ -61,7 +65,7 @@ export default async function SignalDetailPage({ params }: { params: Promise<{ i
           </div>
           {takeProfits.map((tp) => (
             <div key={tp.level} className="bg-green-50 rounded-xl p-4">
-              <p className="text-xs text-green-500 mb-1">TP {tp.level}</p>
+              <p className="text-xs text-green-500 mb-1">Take Profit {tp.level}</p>
               <p className="text-xl font-bold text-green-700">{Number(tp.price).toFixed(5)}</p>
             </div>
           ))}
