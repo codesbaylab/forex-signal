@@ -6,6 +6,7 @@ import { StatCard } from '@/components/ui/stat-card'
 import { TrendingUp, DollarSign, Activity, ArrowDownToLine, ArrowUpFromLine, ArrowLeftRight } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import ReferralLink from './ReferralLink'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -214,12 +215,7 @@ export default async function DashboardPage() {
             <p className="text-2xl font-extrabold text-gray-900">${commissionEarned}</p>
             <p className="text-xs text-gray-500 mt-0.5">Earned</p>
           </div>
-          <div className="flex-1">
-            <p className="text-xs text-gray-500 mb-2">Your referral link</p>
-            <div className="bg-gray-50 rounded-lg px-3 py-2 text-xs text-gray-600 font-mono truncate">
-              {process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.com'}/auth/register?ref={profile.referralCode}
-            </div>
-          </div>
+          <ReferralLink referralCode={profile.referralCode ?? ''} />
         </div>
       </div>
     </div>
