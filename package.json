@@ -38,6 +38,7 @@
     "cmdk": "^1.0.4",
     "date-fns": "^4.1.0",
     "decimal.js": "^10.4.3",
+    "framer-motion": "^12.40.0",
     "lucide-react": "^0.468.0",
     "nanoid": "^5.0.9",
     "next": "14.2.29",

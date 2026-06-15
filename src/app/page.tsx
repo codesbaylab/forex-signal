@@ -1,7 +1,16 @@
 'use client'
-import { useState, useEffect, useRef } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import Link from 'next/link'
+import {
+  motion,
+  useScroll,
+  useTransform,
+  useSpring,
+  useMotionValue,
+  useInView,
+} from 'framer-motion'
 
+/* ─── data ─── */
 const TICKER = [
   { pair: 'EUR/USD', dir: 'BUY', change: '+0.42%', price: '1.0842' },
   { pair: 'GBP/JPY', dir: 'SELL', change: '-0.81%', price: '196.34' },
@@ -23,19 +32,12 @@ const SIGNALS = [
 ]
 
 const FEATURES = [
-  { icon: '⚡', title: 'Instant Signals', desc: 'BUY/SELL alerts with entry, TP and SL delivered the moment our AI detects an opportunity.' },
-  { icon: '🔐', title: 'Crypto Wallet', desc: 'Built-in USDT, BTC & BNB wallet. Deposit, withdraw or transfer funds instantly.' },
+  { icon: '⚡', title: 'Instant Signals', desc: 'BUY/SELL alerts with entry, TP and SL the moment our AI detects opportunity.' },
+  { icon: '🔐', title: 'Crypto Wallet', desc: 'Built-in USDT, BTC & BNB wallet. Deposit, withdraw or transfer instantly.' },
   { icon: '📊', title: 'Technical AI', desc: 'RSI, MACD, EMA and Bollinger Bands analyzed 24/7 across all major pairs.' },
   { icon: '🌐', title: 'All Major Pairs', desc: 'Forex, gold, crypto — 40+ instruments covered with real-time price feeds.' },
   { icon: '🎁', title: 'Referral Income', desc: 'Earn multi-level commissions when your network subscribes. Up to 4 levels deep.' },
   { icon: '📈', title: 'Signal History', desc: 'Full win/loss history with detailed analytics on every signal ever posted.' },
-]
-
-const STATS = [
-  { value: 12847, label: 'Active Traders', suffix: '+' },
-  { value: 89, label: 'Win Rate', suffix: '%' },
-  { value: 3200, label: 'Signals This Month', suffix: '+' },
-  { value: 4, label: 'Referral Levels', suffix: '' },
 ]
 
 const PLANS = [
@@ -44,44 +46,80 @@ const PLANS = [
   { name: 'Pro', price: 59, period: 'month', features: ['Unlimited signals', 'All pairs + crypto', 'Instant push alerts', '4-level referral', 'Analytics dashboard', 'API access'], cta: 'Go Pro', featured: true },
 ]
 
-function useCountUp(target: number, duration = 1800) {
-  const [val, setVal] = useState(0)
-  const started = useRef(false)
-  useEffect(() => {
-    if (started.current) return
-    started.current = true
-    const steps = 60
-    const step = target / steps
-    let cur = 0
-    const t = setInterval(() => {
-      cur += step
-      if (cur >= target) { setVal(target); clearInterval(t) }
-      else setVal(Math.floor(cur))
-    }, duration / steps)
-    return () => clearInterval(t)
-  }, [target, duration])
-  return val
+const STATS = [
+  { value: '12,847+', label: 'Active Traders' },
+  { value: '89%', label: 'Win Rate' },
+  { value: '3,200+', label: 'Signals / Month' },
+  { value: '4 Levels', label: 'Referral Depth' },
+]
+
+/* ─── helpers ─── */
+const ease = [0.25, 0.46, 0.45, 0.94] as const
+
+function useTilt() {
+  const x = useMotionValue(0)
+  const y = useMotionValue(0)
+  const rotateX = useSpring(useTransform(y, [-0.5, 0.5], [10, -10]), { stiffness: 300, damping: 30 })
+  const rotateY = useSpring(useTransform(x, [-0.5, 0.5], [-10, 10]), { stiffness: 300, damping: 30 })
+
+  function onMove(e: React.MouseEvent<HTMLDivElement>) {
+    const rect = e.currentTarget.getBoundingClientRect()
+    x.set((e.clientX - rect.left) / rect.width - 0.5)
+    y.set((e.clientY - rect.top) / rect.height - 0.5)
+  }
+  function onLeave() { x.set(0); y.set(0) }
+
+  return { rotateX, rotateY, onMove, onLeave }
 }
 
-function StatCard({ value, label, suffix }: { value: number; label: string; suffix: string }) {
-  const count = useCountUp(value)
+function ScrollReveal({ children, delay = 0, className = '' }: { children: React.ReactNode; delay?: number; className?: string }) {
+  const ref = useRef<HTMLDivElement>(null)
+  const inView = useInView(ref, { once: true, margin: '-80px' })
   return (
-    <div className="text-center animate-fade-up">
-      <div className="text-5xl font-black text-white mb-1 tabular-nums">
-        {count.toLocaleString()}{suffix}
-      </div>
-      <div className="text-green-300 text-sm font-medium">{label}</div>
-    </div>
+    <motion.div
+      ref={ref}
+      className={className}
+      initial={{ opacity: 0, y: 60, rotateX: 15 }}
+      animate={inView ? { opacity: 1, y: 0, rotateX: 0 } : {}}
+      transition={{ duration: 0.8, delay, ease }}
+      style={{ transformPerspective: 1200 }}
+    >
+      {children}
+    </motion.div>
   )
 }
 
+function TiltCard({ children, className = '' }: { children: React.ReactNode; className?: string }) {
+  const { rotateX, rotateY, onMove, onLeave } = useTilt()
+  return (
+    <motion.div
+      className={className}
+      style={{ rotateX, rotateY, transformPerspective: 1000 }}
+      onMouseMove={onMove}
+      onMouseLeave={onLeave}
+      whileHover={{ scale: 1.04, z: 30 }}
+      transition={{ scale: { duration: 0.2 } }}
+    >
+      {children}
+    </motion.div>
+  )
+}
+
+/* ─── page ─── */
 export default function LandingPage() {
   const [scrolled, setScrolled] = useState(false)
   useEffect(() => {
-    const fn = () => setScrolled(window.scrollY > 20)
+    const fn = () => setScrolled(window.scrollY > 30)
     window.addEventListener('scroll', fn)
     return () => window.removeEventListener('scroll', fn)
   }, [])
+
+  const heroRef = useRef<HTMLElement>(null)
+  const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] })
+  const heroY = useTransform(scrollYProgress, [0, 1], ['0%', '40%'])
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0])
+  const heroScale = useTransform(scrollYProgress, [0, 1], [1, 0.88])
+  const heroRotateX = useTransform(scrollYProgress, [0, 0.6], [0, 8])
 
   const doubled = [...TICKER, ...TICKER]
 
@@ -89,94 +127,147 @@ export default function LandingPage() {
     <div className="min-h-screen bg-[#050f09] text-white overflow-x-hidden">
 
       {/* ── Navbar ── */}
-      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-[#050f09]/90 backdrop-blur-xl border-b border-white/10 shadow-lg' : 'bg-transparent'}`}>
+      <motion.nav
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? 'bg-[#050f09]/80 backdrop-blur-2xl border-b border-white/10' : 'bg-transparent'}`}
+        initial={{ y: -80, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.7, ease }}
+      >
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-green-400 to-green-700 flex items-center justify-center font-black text-white text-base shadow-lg shadow-green-900/50">F</div>
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-green-400 to-green-700 flex items-center justify-center font-black text-white shadow-lg shadow-green-900/50">F</div>
             <span className="font-extrabold text-white text-lg tracking-tight">ForexSignal</span>
           </div>
           <div className="hidden md:flex items-center gap-8 text-sm text-white/60 font-medium">
-            <a href="#features" className="hover:text-white transition-colors">Features</a>
-            <a href="#signals" className="hover:text-white transition-colors">Signals</a>
-            <a href="#pricing" className="hover:text-white transition-colors">Pricing</a>
+            {['Features', 'Signals', 'Pricing'].map((item) => (
+              <a key={item} href={`#${item.toLowerCase()}`} className="hover:text-white transition-colors">{item}</a>
+            ))}
           </div>
           <div className="flex items-center gap-3">
-            <Link href="/auth/login" className="text-sm text-white/70 hover:text-white transition-colors font-medium px-4 py-2">Login</Link>
-            <Link href="/auth/register" className="bg-gradient-to-r from-green-500 to-green-700 hover:from-green-400 hover:to-green-600 text-white font-bold px-5 py-2 rounded-xl text-sm transition-all duration-200 shadow-lg shadow-green-900/40">
+            <Link href="/auth/login" className="text-sm text-white/70 hover:text-white px-4 py-2 transition-colors font-medium">Login</Link>
+            <Link href="/auth/register" className="bg-gradient-to-r from-green-500 to-green-700 hover:from-green-400 hover:to-green-600 text-white font-bold px-5 py-2 rounded-xl text-sm shadow-lg shadow-green-900/40 transition-all duration-200 hover:scale-105">
               Get Started Free
             </Link>
           </div>
         </div>
-      </nav>
+      </motion.nav>
 
       {/* ── Hero ── */}
-      <section className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-24 pb-16 overflow-hidden">
-        {/* Background blobs */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-green-700/20 rounded-full blur-[120px] animate-glow" />
-          <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-green-500/10 rounded-full blur-[100px] animate-glow" style={{ animationDelay: '1.5s' }} />
-          {/* Grid */}
-          <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: 'linear-gradient(#22c55e 1px, transparent 1px), linear-gradient(90deg, #22c55e 1px, transparent 1px)', backgroundSize: '60px 60px' }} />
-        </div>
+      <section ref={heroRef} className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-24 pb-20 overflow-hidden">
+        {/* Parallax background */}
+        <motion.div className="absolute inset-0 pointer-events-none" style={{ y: heroY }}>
+          <div className="absolute top-1/4 left-1/4 w-[700px] h-[700px] bg-green-700/20 rounded-full blur-[140px] animate-glow" />
+          <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-emerald-500/10 rounded-full blur-[120px] animate-glow" style={{ animationDelay: '1.5s' }} />
+          <div className="absolute inset-0 opacity-[0.035]" style={{ backgroundImage: 'linear-gradient(#22c55e 1px, transparent 1px), linear-gradient(90deg, #22c55e 1px, transparent 1px)', backgroundSize: '60px 60px' }} />
+        </motion.div>
 
-        {/* Floating signal cards */}
-        <div className="absolute left-[5%] top-[30%] hidden lg:block animate-float" style={{ animationDelay: '0s' }}>
-          <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-4 w-52 shadow-2xl">
+        {/* Floating signal cards — left */}
+        <motion.div
+          className="absolute left-[4%] top-[28%] hidden xl:block"
+          initial={{ opacity: 0, x: -80, rotateY: -25 }}
+          animate={{ opacity: 1, x: 0, rotateY: 0 }}
+          transition={{ duration: 1, delay: 0.8, ease }}
+          style={{ y: useTransform(scrollYProgress, [0, 1], [0, -80]), transformPerspective: 1000 }}
+        >
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 w-54 shadow-2xl">
             <div className="flex items-center justify-between mb-2">
               <span className="font-bold text-white text-sm">EUR/USD</span>
               <span className="bg-green-500/20 text-green-400 text-xs font-bold px-2 py-0.5 rounded-full">BUY</span>
             </div>
-            <div className="text-2xl font-black text-white mb-1">1.0842</div>
-            <div className="flex justify-between text-xs text-white/50">
-              <span>TP: 1.0910</span><span>SL: 1.0800</span>
-            </div>
-            <div className="mt-2 h-1 bg-white/10 rounded-full overflow-hidden">
-              <div className="h-full bg-green-500 rounded-full w-2/3 animate-pulse" />
-            </div>
+            <div className="text-2xl font-black text-white mb-2">1.0842</div>
+            <div className="flex justify-between text-xs text-white/40 mb-2"><span>TP 1.0910</span><span>SL 1.0800</span></div>
+            <div className="h-1.5 bg-white/10 rounded-full overflow-hidden"><div className="h-full w-2/3 bg-gradient-to-r from-green-500 to-emerald-400 rounded-full animate-pulse" /></div>
           </div>
-        </div>
-        <div className="absolute right-[5%] top-[35%] hidden lg:block animate-float2" style={{ animationDelay: '2s' }}>
-          <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-4 w-52 shadow-2xl">
+        </motion.div>
+
+        {/* Floating signal cards — right */}
+        <motion.div
+          className="absolute right-[4%] top-[32%] hidden xl:block"
+          initial={{ opacity: 0, x: 80, rotateY: 25 }}
+          animate={{ opacity: 1, x: 0, rotateY: 0 }}
+          transition={{ duration: 1, delay: 1, ease }}
+          style={{ y: useTransform(scrollYProgress, [0, 1], [0, -120]), transformPerspective: 1000 }}
+        >
+          <div className="bg-white/5 backdrop-blur-xl border border-green-500/30 rounded-2xl p-4 w-54 shadow-2xl">
             <div className="flex items-center justify-between mb-2">
               <span className="font-bold text-white text-sm">XAU/USD</span>
-              <span className="bg-green-500/20 text-green-400 text-xs font-bold px-2 py-0.5 rounded-full">WIN</span>
+              <span className="bg-green-500/20 text-green-400 text-xs font-bold px-2 py-0.5 rounded-full">WIN ✓</span>
             </div>
-            <div className="text-2xl font-black text-white mb-1">2341.50</div>
-            <div className="flex justify-between text-xs text-white/50">
-              <span>TP: 2380.00</span><span>SL: 2315.00</span>
-            </div>
-            <div className="mt-2 flex items-center gap-1">
-              <span className="text-green-400 text-xs font-bold">+385 pips</span>
-              <span className="text-green-400 text-xs">✓ Closed</span>
-            </div>
+            <div className="text-2xl font-black text-white mb-2">2341.50</div>
+            <div className="flex justify-between text-xs text-white/40 mb-2"><span>TP 2380.00</span><span>SL 2315.00</span></div>
+            <div className="text-green-400 font-bold text-sm">+385 pips</div>
           </div>
-        </div>
+        </motion.div>
 
-        {/* Hero content */}
-        <div className="relative z-10 text-center max-w-4xl mx-auto">
-          <div className="inline-flex items-center gap-2 bg-green-500/10 border border-green-500/30 text-green-400 text-xs font-bold px-4 py-2 rounded-full mb-8 animate-fade-up">
+        {/* Hero text */}
+        <motion.div
+          className="relative z-10 text-center max-w-4xl mx-auto"
+          style={{ y: heroY, opacity: heroOpacity, scale: heroScale, rotateX: heroRotateX, transformPerspective: 1200 }}
+        >
+          <motion.div
+            className="inline-flex items-center gap-2 bg-green-500/10 border border-green-500/30 text-green-400 text-xs font-bold px-4 py-2 rounded-full mb-8"
+            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.1 }}
+          >
             <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse inline-block" />
-            Live signals active now — 3 new signals in the last hour
-          </div>
-          <h1 className="text-6xl md:text-7xl font-black leading-[1.05] mb-6 animate-fade-up-delay-1 tracking-tight">
-            Trade Smarter with
+            Live signals active now — 3 new in the last hour
+          </motion.div>
+
+          <motion.h1
+            className="text-6xl md:text-7xl lg:text-8xl font-black leading-[1.02] mb-6 tracking-tight"
+            initial={{ opacity: 0, y: 50, rotateX: 20 }} animate={{ opacity: 1, y: 0, rotateX: 0 }}
+            transition={{ duration: 0.9, delay: 0.2, ease }}
+            style={{ transformPerspective: 1200 }}
+          >
+            Trade Smarter
             <span className="block bg-gradient-to-r from-green-400 via-emerald-300 to-green-500 bg-clip-text text-transparent animate-gradient-x">
-              AI-Powered Signals
+              with AI Signals
             </span>
-          </h1>
-          <p className="text-lg md:text-xl text-white/60 mb-10 max-w-2xl mx-auto leading-relaxed animate-fade-up-delay-2">
-            Professional BUY/SELL signals for forex, gold & crypto. Precision entry, TP and SL levels — delivered the moment an opportunity appears.
-          </p>
-          <div className="flex items-center justify-center gap-4 flex-wrap animate-fade-up-delay-3">
-            <Link href="/auth/register" className="group bg-gradient-to-r from-green-500 to-green-700 hover:from-green-400 hover:to-green-600 text-white font-bold px-8 py-4 rounded-2xl text-base transition-all duration-200 shadow-xl shadow-green-900/50 hover:shadow-green-700/50 hover:scale-105">
-              Start for Free →
+          </motion.h1>
+
+          <motion.p
+            className="text-lg md:text-xl text-white/55 mb-10 max-w-2xl mx-auto leading-relaxed"
+            initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4, ease }}
+          >
+            Professional BUY/SELL signals for forex, gold & crypto. Precision entry, TP and SL — delivered the moment an opportunity appears.
+          </motion.p>
+
+          <motion.div
+            className="flex items-center justify-center gap-4 flex-wrap"
+            initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.55, ease }}
+          >
+            <Link href="/auth/register" className="group relative bg-gradient-to-r from-green-500 to-green-700 text-white font-bold px-10 py-4 rounded-2xl text-base shadow-xl shadow-green-900/50 transition-all duration-300 hover:scale-110 hover:shadow-green-700/60 overflow-hidden">
+              <span className="relative z-10">Start for Free →</span>
+              <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             </Link>
-            <Link href="/auth/login" className="border border-white/20 hover:border-white/40 text-white/80 hover:text-white font-semibold px-8 py-4 rounded-2xl text-base transition-all duration-200 hover:bg-white/5">
+            <Link href="/auth/login" className="border border-white/20 hover:border-green-500/50 text-white/80 hover:text-white font-semibold px-10 py-4 rounded-2xl text-base transition-all duration-300 hover:bg-white/5 hover:scale-105">
               Sign In
             </Link>
-          </div>
-          <p className="text-white/30 text-sm mt-5 animate-fade-up-delay-4">No credit card required · Cancel anytime · Crypto payments only</p>
-        </div>
+          </motion.div>
+
+          <motion.p
+            className="text-white/25 text-sm mt-5"
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.9 }}
+          >
+            No credit card required · Cancel anytime · Crypto payments
+          </motion.p>
+        </motion.div>
+
+        {/* Scroll indicator */}
+        <motion.div
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.5 }}
+          style={{ opacity: heroOpacity }}
+        >
+          <span className="text-white/30 text-xs font-medium tracking-widest uppercase">Scroll</span>
+          <motion.div
+            className="w-5 h-8 border border-white/20 rounded-full flex items-start justify-center p-1"
+            animate={{ y: [0, 4, 0] }} transition={{ repeat: Infinity, duration: 1.5 }}
+          >
+            <div className="w-1 h-1.5 bg-white/40 rounded-full" />
+          </motion.div>
+        </motion.div>
       </section>
 
       {/* ── Live Ticker ── */}
@@ -188,117 +279,118 @@ export default function LandingPage() {
               <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${t.dir === 'BUY' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>{t.dir}</span>
               <span className="text-white/60 text-sm font-mono">{t.price}</span>
               <span className={`text-xs font-semibold ${t.dir === 'BUY' ? 'text-green-400' : 'text-red-400'}`}>{t.change}</span>
-              <span className="text-white/10">|</span>
+              <span className="text-white/10 mx-2">|</span>
             </div>
           ))}
         </div>
       </div>
 
       {/* ── Stats ── */}
-      <section className="py-20 px-6 bg-gradient-to-b from-transparent to-black/20">
-        <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-10">
-          {STATS.map((s) => <StatCard key={s.label} {...s} />)}
+      <section className="py-24 px-6">
+        <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
+          {STATS.map((s, i) => (
+            <ScrollReveal key={s.label} delay={i * 0.1} className="text-center">
+              <div className="text-4xl md:text-5xl font-black text-white mb-2 bg-gradient-to-b from-white to-white/60 bg-clip-text text-transparent">{s.value}</div>
+              <div className="text-green-400 text-sm font-semibold">{s.label}</div>
+            </ScrollReveal>
+          ))}
         </div>
       </section>
 
       {/* ── Signal Preview ── */}
       <section id="signals" className="py-20 px-6">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12 animate-fade-up">
+          <ScrollReveal className="text-center mb-14">
             <div className="inline-block bg-green-500/10 border border-green-500/20 text-green-400 text-xs font-bold px-3 py-1 rounded-full mb-4">LIVE SIGNALS</div>
-            <h2 className="text-4xl font-black text-white mb-3">See What You Get</h2>
-            <p className="text-white/50 text-lg">Real signals from our AI engine — entry, TP, SL, and win tracking</p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <h2 className="text-4xl md:text-5xl font-black text-white mb-3">See What You Get</h2>
+            <p className="text-white/45 text-lg">Real signals — entry, TP, SL, and win tracking in one card</p>
+          </ScrollReveal>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {SIGNALS.map((s, i) => (
-              <div key={i} className={`animate-fade-up-delay-${i + 1} group relative bg-white/5 hover:bg-white/10 border ${s.status === 'WIN' ? 'border-green-500/40' : s.dir === 'BUY' ? 'border-green-500/20' : 'border-red-500/20'} rounded-2xl p-5 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-green-900/20`}>
-                {s.status === 'WIN' && (
-                  <div className="absolute -top-2 -right-2 bg-green-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-lg">WIN ✓</div>
-                )}
-                <div className="flex items-center justify-between mb-3">
-                  <span className="font-black text-white text-lg">{s.pair}</span>
-                  <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${s.dir === 'BUY' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>{s.dir}</span>
-                </div>
-                <div className="text-2xl font-black text-white mb-3">{s.entry}</div>
-                <div className="space-y-1.5 text-xs text-white/50 mb-3">
-                  <div className="flex justify-between"><span>Take Profit</span><span className="text-green-400 font-semibold">{s.tp}</span></div>
-                  <div className="flex justify-between"><span>Stop Loss</span><span className="text-red-400 font-semibold">{s.sl}</span></div>
-                </div>
-                <div className="flex items-center justify-between pt-2 border-t border-white/10">
-                  <span className="text-green-400 font-bold text-sm">{s.pips} pips</span>
-                  <span className="text-white/30 text-xs">{s.time}</span>
-                </div>
-              </div>
+              <ScrollReveal key={i} delay={i * 0.1}>
+                <TiltCard className={`relative bg-white/5 border ${s.status === 'WIN' ? 'border-green-500/50' : s.dir === 'BUY' ? 'border-green-500/20' : 'border-red-500/20'} rounded-2xl p-5 cursor-default h-full`}>
+                  {s.status === 'WIN' && (
+                    <div className="absolute -top-2.5 -right-2.5 bg-gradient-to-r from-green-500 to-emerald-400 text-green-900 text-[10px] font-black px-2.5 py-0.5 rounded-full shadow-lg">WIN ✓</div>
+                  )}
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="font-black text-white text-lg">{s.pair}</span>
+                    <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${s.dir === 'BUY' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>{s.dir}</span>
+                  </div>
+                  <div className="text-2xl font-black text-white mb-3">{s.entry}</div>
+                  <div className="space-y-1.5 text-xs text-white/40 mb-3">
+                    <div className="flex justify-between"><span>Take Profit</span><span className="text-green-400 font-semibold">{s.tp}</span></div>
+                    <div className="flex justify-between"><span>Stop Loss</span><span className="text-red-400 font-semibold">{s.sl}</span></div>
+                  </div>
+                  <div className="flex items-center justify-between pt-2.5 border-t border-white/10">
+                    <span className="text-green-400 font-bold text-sm">{s.pips} pips</span>
+                    <span className="text-white/25 text-xs">{s.time}</span>
+                  </div>
+                </TiltCard>
+              </ScrollReveal>
             ))}
           </div>
         </div>
       </section>
 
       {/* ── Features ── */}
-      <section id="features" className="py-20 px-6 bg-white/[0.02] border-y border-white/5">
+      <section id="features" className="py-20 px-6 border-y border-white/5 bg-white/[0.015]">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12 animate-fade-up">
+          <ScrollReveal className="text-center mb-14">
             <div className="inline-block bg-green-500/10 border border-green-500/20 text-green-400 text-xs font-bold px-3 py-1 rounded-full mb-4">FEATURES</div>
-            <h2 className="text-4xl font-black text-white mb-3">Everything you need to win</h2>
-            <p className="text-white/50 text-lg">Built for serious traders. No noise, just edge.</p>
-          </div>
+            <h2 className="text-4xl md:text-5xl font-black text-white mb-3">Everything you need to win</h2>
+            <p className="text-white/45 text-lg">Built for serious traders. No noise, just edge.</p>
+          </ScrollReveal>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {FEATURES.map((f, i) => (
-              <div key={f.title} className={`animate-fade-up-delay-${i + 1} group bg-white/5 hover:bg-white/10 border border-white/10 hover:border-green-500/30 rounded-2xl p-6 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-green-900/10`}>
-                <div className="text-3xl mb-4 group-hover:scale-110 transition-transform duration-200">{f.icon}</div>
-                <h3 className="font-bold text-white text-lg mb-2">{f.title}</h3>
-                <p className="text-white/50 text-sm leading-relaxed">{f.desc}</p>
-              </div>
+              <ScrollReveal key={f.title} delay={i * 0.08}>
+                <TiltCard className="group bg-white/5 hover:bg-white/[0.08] border border-white/10 hover:border-green-500/30 rounded-2xl p-6 transition-colors duration-300 cursor-default h-full">
+                  <div className="text-3xl mb-4">{f.icon}</div>
+                  <h3 className="font-bold text-white text-lg mb-2">{f.title}</h3>
+                  <p className="text-white/45 text-sm leading-relaxed">{f.desc}</p>
+                </TiltCard>
+              </ScrollReveal>
             ))}
           </div>
         </div>
       </section>
 
       {/* ── Pricing ── */}
-      <section id="pricing" className="py-20 px-6">
+      <section id="pricing" className="py-24 px-6">
         <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-12 animate-fade-up">
+          <ScrollReveal className="text-center mb-14">
             <div className="inline-block bg-green-500/10 border border-green-500/20 text-green-400 text-xs font-bold px-3 py-1 rounded-full mb-4">PRICING</div>
-            <h2 className="text-4xl font-black text-white mb-3">Simple, transparent pricing</h2>
-            <p className="text-white/50 text-lg">Pay with crypto. Cancel anytime.</p>
-          </div>
+            <h2 className="text-4xl md:text-5xl font-black text-white mb-3">Simple, transparent pricing</h2>
+            <p className="text-white/45 text-lg">Pay with crypto. Cancel anytime.</p>
+          </ScrollReveal>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {PLANS.map((plan, i) => (
-              <div key={plan.name} className={`animate-fade-up-delay-${i + 1} relative rounded-2xl p-7 flex flex-col transition-all duration-300 hover:scale-[1.02] ${
-                plan.featured
-                  ? 'bg-gradient-to-b from-green-600 to-green-800 border border-green-500/50 shadow-2xl shadow-green-900/50'
-                  : 'bg-white/5 border border-white/10 hover:border-white/20'
-              }`}>
-                {plan.featured && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-green-400 to-emerald-400 text-green-900 text-xs font-black px-4 py-1 rounded-full shadow-lg whitespace-nowrap">
-                    MOST POPULAR
+              <ScrollReveal key={plan.name} delay={i * 0.12}>
+                <TiltCard className={`relative rounded-2xl p-7 flex flex-col h-full ${plan.featured ? 'bg-gradient-to-b from-green-600/80 to-green-900/80 border border-green-400/40 shadow-2xl shadow-green-900/50' : 'bg-white/5 border border-white/10'}`}>
+                  {plan.featured && (
+                    <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-green-400 to-emerald-400 text-green-900 text-xs font-black px-4 py-1 rounded-full shadow-lg whitespace-nowrap">MOST POPULAR</div>
+                  )}
+                  <div className="mb-6">
+                    <h3 className="font-bold text-lg text-white mb-2">{plan.name}</h3>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-5xl font-black text-white">${plan.price}</span>
+                      <span className="text-white/40 text-sm">/{plan.period}</span>
+                    </div>
                   </div>
-                )}
-                <div className="mb-6">
-                  <h3 className="font-bold text-lg text-white mb-2">{plan.name}</h3>
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-5xl font-black text-white">${plan.price}</span>
-                    <span className="text-white/50 text-sm">/{plan.period}</span>
-                  </div>
-                </div>
-                <ul className="space-y-3 flex-1 mb-7">
-                  {plan.features.map((feat) => (
-                    <li key={feat} className="flex items-center gap-2.5 text-sm">
-                      <svg className="w-4 h-4 flex-shrink-0 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="text-white/80">{feat}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Link href="/auth/register" className={`block text-center font-bold py-3 rounded-xl transition-all duration-200 ${
-                  plan.featured
-                    ? 'bg-white text-green-800 hover:bg-gray-100 shadow-lg'
-                    : 'bg-green-600 hover:bg-green-500 text-white'
-                }`}>
-                  {plan.cta}
-                </Link>
-              </div>
+                  <ul className="space-y-3 flex-1 mb-7">
+                    {plan.features.map((feat) => (
+                      <li key={feat} className="flex items-center gap-2.5 text-sm">
+                        <svg className="w-4 h-4 flex-shrink-0 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span className="text-white/75">{feat}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <Link href="/auth/register" className={`block text-center font-bold py-3.5 rounded-xl transition-all duration-200 hover:scale-105 ${plan.featured ? 'bg-white text-green-800 hover:bg-gray-100 shadow-lg' : 'bg-green-600/80 hover:bg-green-500 text-white'}`}>
+                    {plan.cta}
+                  </Link>
+                </TiltCard>
+              </ScrollReveal>
             ))}
           </div>
         </div>
@@ -307,17 +399,19 @@ export default function LandingPage() {
       {/* ── Referral Banner ── */}
       <section className="py-16 px-6">
         <div className="max-w-4xl mx-auto">
-          <div className="relative bg-gradient-to-r from-green-900/60 to-emerald-900/40 border border-green-500/30 rounded-3xl p-10 text-center overflow-hidden">
-            <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'linear-gradient(#22c55e 1px, transparent 1px), linear-gradient(90deg, #22c55e 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
-            <div className="relative z-10">
-              <div className="text-4xl mb-4">🎁</div>
-              <h2 className="text-3xl font-black text-white mb-3">Earn While You Sleep</h2>
-              <p className="text-white/60 text-lg mb-6 max-w-xl mx-auto">Share your referral link and earn commissions up to 4 levels deep — every time your network subscribes.</p>
-              <Link href="/auth/register" className="inline-block bg-gradient-to-r from-green-500 to-green-700 hover:from-green-400 hover:to-green-600 text-white font-bold px-8 py-4 rounded-2xl transition-all duration-200 hover:scale-105 shadow-xl shadow-green-900/40">
-                Start Earning Now →
-              </Link>
-            </div>
-          </div>
+          <ScrollReveal>
+            <TiltCard className="relative bg-gradient-to-r from-green-900/60 to-emerald-900/40 border border-green-500/30 rounded-3xl p-12 text-center overflow-hidden cursor-default">
+              <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: 'linear-gradient(#22c55e 1px, transparent 1px), linear-gradient(90deg, #22c55e 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
+              <div className="relative z-10">
+                <div className="text-5xl mb-5">🎁</div>
+                <h2 className="text-3xl md:text-4xl font-black text-white mb-3">Earn While You Sleep</h2>
+                <p className="text-white/55 text-lg mb-8 max-w-xl mx-auto">Share your referral link and earn commissions up to 4 levels deep — every time your network subscribes.</p>
+                <Link href="/auth/register" className="inline-block bg-gradient-to-r from-green-500 to-green-700 hover:from-green-400 hover:to-green-600 text-white font-bold px-10 py-4 rounded-2xl transition-all duration-300 hover:scale-110 shadow-xl shadow-green-900/40">
+                  Start Earning Now →
+                </Link>
+              </div>
+            </TiltCard>
+          </ScrollReveal>
         </div>
       </section>
 
@@ -328,8 +422,8 @@ export default function LandingPage() {
             <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-green-400 to-green-700 flex items-center justify-center font-black text-white text-sm">F</div>
             <span className="font-extrabold text-white">ForexSignal</span>
           </div>
-          <p className="text-white/30 text-sm">© 2025 ForexSignal. All rights reserved. Trading involves risk.</p>
-          <div className="flex items-center gap-6 text-white/40 text-sm">
+          <p className="text-white/25 text-sm">© 2025 ForexSignal. All rights reserved. Trading involves risk.</p>
+          <div className="flex items-center gap-6 text-white/35 text-sm">
             <a href="#" className="hover:text-white transition-colors">Privacy</a>
             <a href="#" className="hover:text-white transition-colors">Terms</a>
             <Link href="/auth/login" className="hover:text-white transition-colors">Login</Link>
