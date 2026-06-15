@@ -2,7 +2,6 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 
 const PUBLIC_PATHS = ['/', '/auth/login', '/auth/register', '/auth/forgot-password', '/auth/reset-password', '/auth/callback', '/maintenance']
-const ADMIN_PATHS = ['/admin']
 
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
@@ -30,9 +29,7 @@ export async function middleware(request: NextRequest) {
 
   const path = request.nextUrl.pathname
   const isPublicPath = PUBLIC_PATHS.some((p) => path === p || path.startsWith('/auth/'))
-  const isAdminPath = ADMIN_PATHS.some((p) => path.startsWith(p))
   const isApiPath = path.startsWith('/api/')
-  const isWebhookPath = path.startsWith('/api/webhooks/')
 
   // Allow public paths and API routes
   if (isPublicPath || isApiPath) return supabaseResponse
