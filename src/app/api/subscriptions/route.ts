@@ -51,9 +51,8 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    // Distribute commissions async (don't block response)
     if (paidAmount > 0) {
-      distributeCommissions(subscription.id).catch(console.error)
+      await distributeCommissions(subscription.id)
     }
 
     return NextResponse.json({ success: true, data: subscription }, { status: 201 })
