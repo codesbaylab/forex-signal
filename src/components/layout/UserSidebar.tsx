@@ -51,7 +51,7 @@ export default function UserSidebar({ onClose }: { onClose?: () => void }) {
         <div className="w-9 h-9 bg-brand-700 rounded-xl flex items-center justify-center flex-shrink-0">
           <TrendingUp className="w-5 h-5 text-white" />
         </div>
-        <span className="text-lg font-extrabold tracking-tight text-gray-900">ForexSignal</span>
+        <span className="text-lg font-extrabold tracking-tight text-gray-900">SignalFX Pro</span>
       </div>
 
       {/* Nav */}

@@ -45,9 +45,9 @@ export default function LoginPage() {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-brand-700 text-white font-bold text-xl mb-4">F</div>
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-brand-700 text-white font-bold text-xl mb-4">S</div>
           <h1 className="text-2xl font-extrabold text-gray-900">Welcome back</h1>
-          <p className="text-sm text-gray-500 mt-1">Sign in to your ForexSignal account</p>
+          <p className="text-sm text-gray-500 mt-1">Sign in to your SignalFX Pro account</p>
         </div>
 
         <div className="bg-white rounded-2xl border border-gray-100 p-7 shadow-sm">

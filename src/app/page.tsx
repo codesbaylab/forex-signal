@@ -135,8 +135,8 @@ export default function LandingPage() {
       >
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-green-400 to-green-700 flex items-center justify-center font-black text-white shadow-lg shadow-green-900/50">F</div>
-            <span className="font-extrabold text-white text-lg tracking-tight">ForexSignal</span>
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-green-400 to-green-700 flex items-center justify-center font-black text-white shadow-lg shadow-green-900/50">S</div>
+            <span className="font-extrabold text-white text-lg tracking-tight">SignalFX Pro</span>
           </div>
           <div className="hidden md:flex items-center gap-8 text-sm text-white/60 font-medium">
             {['Features', 'Signals', 'Pricing'].map((item) => (
@@ -419,10 +419,10 @@ export default function LandingPage() {
       <footer className="border-t border-white/10 py-10 px-6">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-green-400 to-green-700 flex items-center justify-center font-black text-white text-sm">F</div>
-            <span className="font-extrabold text-white">ForexSignal</span>
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-green-400 to-green-700 flex items-center justify-center font-black text-white text-sm">S</div>
+            <span className="font-extrabold text-white">SignalFX Pro</span>
           </div>
-          <p className="text-white/25 text-sm">© 2025 ForexSignal. All rights reserved. Trading involves risk.</p>
+          <p className="text-white/25 text-sm">© 2025 SignalFX Pro. All rights reserved. Trading involves risk.</p>
           <div className="flex items-center gap-6 text-white/35 text-sm">
             <a href="#" className="hover:text-white transition-colors">Privacy</a>
             <a href="#" className="hover:text-white transition-colors">Terms</a>

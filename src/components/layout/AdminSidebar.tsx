@@ -53,7 +53,7 @@ export default function AdminSidebar({ onClose }: { onClose?: () => void }) {
           <Shield className="w-5 h-5 text-white" />
         </div>
         <div>
-          <span className="text-base font-extrabold tracking-tight text-gray-900 block">ForexSignal</span>
+          <span className="text-base font-extrabold tracking-tight text-gray-900 block">SignalFX Pro</span>
           <span className="text-[10px] font-semibold text-brand-700 uppercase tracking-wider">Admin Panel</span>
         </div>
       </div>

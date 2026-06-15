@@ -7,7 +7,7 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'ForexSignal — Professional Trading Signals',
+  title: 'SignalFX Pro — Professional Trading Signals',
   description: 'Real-time forex signals powered by technical analysis. Join thousands of traders.',
 }
 

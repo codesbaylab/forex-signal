@@ -9,7 +9,7 @@ interface Props {
 }
 
 export default function SettingsForm({ initialSettings }: Props) {
-  const [siteName, setSiteName] = useState(initialSettings['site_name'] ?? 'ForexSignal')
+  const [siteName, setSiteName] = useState(initialSettings['site_name'] ?? 'SignalFX Pro')
   const [maintenance, setMaintenance] = useState(initialSettings['maintenance_mode'] === 'true')
   const [minUSDT, setMinUSDT] = useState(initialSettings['min_withdrawal_usdt'] ?? '10')
   const [minBTC, setMinBTC] = useState(initialSettings['min_withdrawal_btc'] ?? '0.001')
