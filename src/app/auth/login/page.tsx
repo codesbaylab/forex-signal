@@ -32,7 +32,13 @@ export default function LoginPage() {
       setLoading(false)
       return
     }
-    router.push('/dashboard')
+    const res = await fetch('/api/auth/me')
+    const json = await res.json()
+    if (json?.data?.role === 'ADMIN') {
+      router.push('/admin')
+    } else {
+      router.push('/dashboard')
+    }
   }
 
   return (
