@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { PageHeader } from '@/components/ui/page-header'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
+import DeletePlanButton from './DeletePlanButton'
 
 export default async function AdminPlansPage() {
   const supabase = await createClient()
@@ -37,9 +38,12 @@ export default async function AdminPlansPage() {
               <ul className="space-y-1.5 mb-5 min-h-[80px]">
                 {features.map((f, i) => <li key={i} className="text-xs text-gray-600">• {f}</li>)}
               </ul>
-              <Link href={`/admin/plans/${plan.id}/edit`}>
-                <Button variant="outline" className="w-full text-sm">Edit</Button>
-              </Link>
+              <div className="flex flex-col gap-2">
+                <Link href={`/admin/plans/${plan.id}/edit`}>
+                  <Button variant="outline" className="w-full text-sm">Edit</Button>
+                </Link>
+                <DeletePlanButton planId={plan.id} planName={plan.name} />
+              </div>
             </div>
           )
         })}
