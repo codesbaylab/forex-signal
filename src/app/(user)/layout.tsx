@@ -12,11 +12,12 @@ export default async function UserLayout({ children }: { children: React.ReactNo
 
   const profile = await prisma.profile.findUnique({
     where: { id: user.id },
-    select: { id: true, name: true, email: true, avatarUrl: true, isBanned: true },
+    select: { id: true, name: true, email: true, avatarUrl: true, isBanned: true, role: true },
   })
 
   if (!profile) redirect('/auth/login')
   if (profile.isBanned) redirect('/banned')
+  if (profile.role === 'ADMIN') redirect('/admin')
 
   return (
     <div className="min-h-screen bg-gray-100">
