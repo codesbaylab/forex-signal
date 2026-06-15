@@ -6,6 +6,7 @@ import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import AdminUserActions from './AdminUserActions'
+import ManualWalletForm from './ManualWalletForm'
 
 export default async function AdminUserDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -35,7 +36,7 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
       </div>
       <PageHeader title={target.name ?? target.email} subtitle={target.email} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-5 mb-6">
         {/* Profile */}
         <div className="bg-white rounded-2xl border border-gray-100 p-5">
           <h3 className="font-bold text-gray-900 mb-4">Profile</h3>
@@ -65,6 +66,12 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
               </div>
             ))}
           </div>
+        </div>
+
+        {/* Manual Balance Adjustment */}
+        <div className="bg-white rounded-2xl border border-gray-100 p-5">
+          <h3 className="font-bold text-gray-900 mb-4">Adjust Balance</h3>
+          <ManualWalletForm userId={target.id} />
         </div>
 
         {/* Subscription */}
