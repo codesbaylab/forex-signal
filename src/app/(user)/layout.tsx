@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import UserSidebar from '@/components/layout/UserSidebar'
-import Topbar from '@/components/layout/Topbar'
+import LayoutShell from '@/components/layout/LayoutShell'
 
 export default async function UserLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -20,14 +20,11 @@ export default async function UserLayout({ children }: { children: React.ReactNo
   if (profile.role === 'ADMIN') redirect('/admin')
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <UserSidebar />
-      <div className="ml-60 flex flex-col min-h-screen">
-        <Topbar user={profile} />
-        <main className="flex-1 p-7">
-          {children}
-        </main>
-      </div>
-    </div>
+    <LayoutShell
+      sidebar={(onClose) => <UserSidebar onClose={onClose} />}
+      user={profile}
+    >
+      {children}
+    </LayoutShell>
   )
 }

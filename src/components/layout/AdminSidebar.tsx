@@ -31,7 +31,7 @@ const adminNav = [
   { label: 'Settings', href: '/admin/settings', icon: Settings },
 ]
 
-export default function AdminSidebar() {
+export default function AdminSidebar({ onClose }: { onClose?: () => void }) {
   const pathname = usePathname()
   const router = useRouter()
 
@@ -41,10 +41,14 @@ export default function AdminSidebar() {
     router.push('/auth/login')
   }
 
+  function handleNav() {
+    onClose?.()
+  }
+
   return (
-    <aside className="fixed left-0 top-0 w-60 h-screen bg-white border-r border-gray-100 flex flex-col z-10">
+    <aside className="w-60 h-screen bg-white border-r border-gray-100 flex flex-col">
       {/* Logo */}
-      <div className="px-5 py-6 border-b border-gray-100 flex items-center gap-3">
+      <div className="px-5 py-6 border-b border-gray-100 flex items-center gap-3 flex-shrink-0">
         <div className="w-9 h-9 bg-brand-700 rounded-xl flex items-center justify-center flex-shrink-0">
           <Shield className="w-5 h-5 text-white" />
         </div>
@@ -59,7 +63,7 @@ export default function AdminSidebar() {
         {adminNav.map((item) => {
           const active = item.exact ? pathname === item.href : pathname === item.href || pathname.startsWith(item.href + '/')
           return (
-            <Link key={item.href} href={item.href}>
+            <Link key={item.href} href={item.href} onClick={handleNav}>
               <div className={cn(
                 'flex items-center gap-2.5 px-4 py-2.5 mx-2.5 rounded-xl cursor-pointer text-sm font-medium transition-all relative',
                 active
