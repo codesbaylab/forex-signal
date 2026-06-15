@@ -44,19 +44,6 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl)
   }
 
-  // Admin path check — verify role in DB
-  if (isAdminPath && !isWebhookPath) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role, is_banned')
-      .eq('id', user.id)
-      .single()
-
-    if (!profile || profile.role !== 'ADMIN') {
-      return NextResponse.redirect(new URL('/dashboard', request.url))
-    }
-  }
-
   return supabaseResponse
 }
 
