@@ -213,7 +213,7 @@ export default function LandingPage() {
           </motion.div>
 
           <motion.h1
-            className="text-6xl md:text-7xl lg:text-8xl font-black leading-[1.02] mb-6 tracking-tight"
+            className="text-6xl md:text-7xl lg:text-8xl font-black leading-[1.15] pb-2 mb-4 tracking-tight"
             initial={{ opacity: 0, y: 50, rotateX: 20 }} animate={{ opacity: 1, y: 0, rotateX: 0 }}
             transition={{ duration: 0.9, delay: 0.2, ease }}
             style={{ transformPerspective: 1200 }}
