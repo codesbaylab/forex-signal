@@ -37,7 +37,6 @@ export default function SettingsForm({ initialSettings: s }: Props) {
   const [siteName, setSiteName] = useState(s['site_name'] ?? 'SignalFX Pro')
   const [maintenance, setMaintenance] = useState(s['maintenance_mode'] === 'true')
   const [minUSDT, setMinUSDT] = useState(s['min_withdrawal_usdt'] ?? '10')
-  const [referralLevels, setReferralLevels] = useState(s['referral_levels_count'] ?? '3')
 
   // NowPayments
   const [npEnabled, setNpEnabled] = useState(s['payment_nowpayments_enabled'] === 'true')
@@ -84,7 +83,6 @@ export default function SettingsForm({ initialSettings: s }: Props) {
       site_name: siteName,
       maintenance_mode: String(maintenance),
       min_withdrawal_usdt: minUSDT,
-      referral_levels_count: referralLevels,
       payment_nowpayments_enabled: String(npEnabled),
       payment_nowpayments_api_key: npApiKey,
       payment_nowpayments_ipn_secret: npIpnSecret,
@@ -129,14 +127,6 @@ export default function SettingsForm({ initialSettings: s }: Props) {
           <div className="flex items-center gap-3">
             <Label className="w-32 text-xs text-gray-500">Min USDT (TRC20)</Label>
             <Input type="number" min="0" step="0.01" value={minUSDT} onChange={(e) => setMinUSDT(e.target.value)} className="flex-1" />
-          </div>
-        </Section>
-
-        {/* Referral */}
-        <Section title="Referral">
-          <div>
-            <Label htmlFor="referralLevels">Referral Levels Count</Label>
-            <Input id="referralLevels" type="number" min="1" max="10" value={referralLevels} onChange={(e) => setReferralLevels(e.target.value)} className="mt-1 max-w-xs" />
           </div>
         </Section>
 
