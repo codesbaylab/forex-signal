@@ -72,17 +72,17 @@ export default async function DashboardPage() {
           <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-2xl font-bold">₮</div>
         </div>
         <div className="flex items-center gap-3 mt-4 pt-4 border-t border-white/10">
-          <Link href="/deposit">
+          <Link href="/wallet/deposit">
             <button className="flex items-center gap-1.5 text-xs font-semibold bg-white/10 hover:bg-white/20 text-white px-3 py-1.5 rounded-lg transition-colors">
               <ArrowDownToLine className="w-3 h-3" /> Deposit
             </button>
           </Link>
-          <Link href="/withdraw">
+          <Link href="/wallet/withdraw">
             <button className="flex items-center gap-1.5 text-xs font-semibold bg-white/10 hover:bg-white/20 text-white px-3 py-1.5 rounded-lg transition-colors">
               <ArrowUpFromLine className="w-3 h-3" /> Withdraw
             </button>
           </Link>
-          <Link href="/transfer">
+          <Link href="/wallet/transfer">
             <button className="flex items-center gap-1.5 text-xs font-semibold bg-white/10 hover:bg-white/20 text-white px-3 py-1.5 rounded-lg transition-colors">
               <ArrowLeftRight className="w-3 h-3" /> Transfer
             </button>
