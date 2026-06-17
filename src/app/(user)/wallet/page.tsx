@@ -5,24 +5,15 @@ import { PageHeader } from '@/components/ui/page-header'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 
-const CURRENCY_ICONS: Record<string, string> = {
-  USDT_TRC20: '₮',
-  BTC: '₿',
-  BNB_BEP20: 'B',
-}
-
-const CURRENCY_LABELS: Record<string, string> = {
-  USDT_TRC20: 'USDT (TRC20)',
-  BTC: 'Bitcoin',
-  BNB_BEP20: 'BNB (BEP20)',
-}
+const CURRENCY_ICONS: Record<string, string> = { USDT_TRC20: '₮' }
+const CURRENCY_LABELS: Record<string, string> = { USDT_TRC20: 'USDT (TRC20)' }
 
 export default async function WalletPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
 
-  const wallets = await prisma.wallet.findMany({ where: { userId: user.id } })
+  const wallets = await prisma.wallet.findMany({ where: { userId: user.id, currency: 'USDT_TRC20' } })
   const recentTxs = await prisma.transaction.findMany({
     where: { userId: user.id },
     orderBy: { createdAt: 'desc' },
@@ -45,7 +36,7 @@ export default async function WalletPage() {
       <PageHeader title="Wallet" subtitle="Manage your crypto wallets" />
 
       {/* Wallet Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-7">
+      <div className="grid grid-cols-1 gap-5 mb-7">
         {wallets.map((wallet) => (
           <div key={wallet.id} className="bg-white rounded-2xl border border-gray-100 p-5">
             <div className="flex items-center gap-3 mb-5">

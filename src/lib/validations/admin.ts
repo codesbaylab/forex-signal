@@ -8,7 +8,7 @@ export const UpdateUserSchema = z.object({
 })
 
 export const ManualWalletSchema = z.object({
-  currency: z.enum(['USDT_TRC20', 'BTC', 'BNB_BEP20']),
+  currency: z.enum(['USDT_TRC20']).default('USDT_TRC20'),
   amount: z.number().positive(),
   type: z.enum(['MANUAL_CREDIT', 'MANUAL_DEBIT']),
   note: z.string().min(1, 'Note is required for manual adjustments'),
@@ -34,7 +34,7 @@ export const CreatePlanSchema = z.object({
   name: z.string().min(1),
   description: z.string().optional(),
   price: z.number().min(0),
-  currency: z.enum(['USDT_TRC20', 'BTC', 'BNB_BEP20']).default('USDT_TRC20'),
+  currency: z.enum(['USDT_TRC20']).default('USDT_TRC20'),
   durationDays: z.number().int().positive(),
   features: z.array(z.string()),
   signalAccess: z.array(z.string()).default([]),

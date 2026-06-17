@@ -35,11 +35,7 @@ export async function POST(request: NextRequest) {
         referralCode: newReferralCode,
         referredById,
         wallets: {
-          create: [
-            { currency: Currency.USDT_TRC20 },
-            { currency: Currency.BTC },
-            { currency: Currency.BNB_BEP20 },
-          ],
+          create: [{ currency: Currency.USDT_TRC20 }],
         },
       },
     })

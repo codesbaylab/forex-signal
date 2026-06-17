@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-const CurrencyEnum = z.enum(['USDT_TRC20', 'BTC', 'BNB_BEP20'])
+const CurrencyEnum = z.enum(['USDT_TRC20'])
 
 export const DepositSchema = z.object({
   currency: CurrencyEnum,

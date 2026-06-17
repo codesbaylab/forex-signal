@@ -77,11 +77,10 @@ export default function PlanForm({ defaultValues, planId }: Props) {
         </div>
         <div>
           <Label htmlFor="currency">Currency</Label>
-          <select id="currency" value={form.currency} onChange={(e) => set('currency', e.target.value)} className="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-700">
-            <option value="USDT_TRC20">USDT TRC20</option>
-            <option value="BTC">Bitcoin</option>
-            <option value="BNB_BEP20">BNB BEP20</option>
-          </select>
+          <div className="mt-1 flex items-center gap-2 bg-gray-50 rounded-xl border border-gray-200 px-3 py-2">
+            <span>₮</span><span className="text-sm font-medium text-gray-700">USDT (TRC20)</span>
+          </div>
+          <input type="hidden" value="USDT_TRC20" onChange={() => set('currency', 'USDT_TRC20')} />
         </div>
         <div>
           <Label htmlFor="features">Features (one per line)</Label>

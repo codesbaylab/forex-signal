@@ -40,19 +40,9 @@ export function generateReferralCode(length = 8): string {
 }
 
 export function getCurrencyLabel(currency: string): string {
-  const labels: Record<string, string> = {
-    USDT_TRC20: 'USDT (TRC20)',
-    BTC: 'Bitcoin (BTC)',
-    BNB_BEP20: 'BNB (BEP20)',
-  }
-  return labels[currency] ?? currency
+  return currency === 'USDT_TRC20' ? 'USDT (TRC20)' : currency
 }
 
 export function getCurrencySymbol(currency: string): string {
-  const symbols: Record<string, string> = {
-    USDT_TRC20: 'USDT',
-    BTC: 'BTC',
-    BNB_BEP20: 'BNB',
-  }
-  return symbols[currency] ?? currency
+  return currency === 'USDT_TRC20' ? 'USDT' : currency
 }

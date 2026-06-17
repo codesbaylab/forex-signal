@@ -13,12 +13,10 @@ export default function WithdrawPage() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
 
-  const { register, handleSubmit, watch, formState: { errors } } = useForm<WithdrawInput>({
+  const { register, handleSubmit, formState: { errors } } = useForm<WithdrawInput>({
     resolver: zodResolver(WithdrawSchema),
     defaultValues: { currency: 'USDT_TRC20' },
   })
-
-  const selectedCurrency = watch('currency')
 
   async function onSubmit(data: WithdrawInput) {
     setLoading(true)
@@ -65,18 +63,11 @@ export default function WithdrawPage() {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
           <div>
             <Label>Currency</Label>
-            <div className="grid grid-cols-3 gap-3 mt-2">
-              {[
-                { value: 'USDT_TRC20', label: 'USDT TRC20' },
-                { value: 'BTC', label: 'Bitcoin' },
-                { value: 'BNB_BEP20', label: 'BNB BEP20' },
-              ].map((opt) => (
-                <label key={opt.value} className={`p-3 rounded-xl border-2 cursor-pointer text-center transition-all ${selectedCurrency === opt.value ? 'border-brand-700 bg-brand-50' : 'border-gray-100 hover:border-gray-300'}`}>
-                  <input type="radio" value={opt.value} {...register('currency')} className="sr-only" />
-                  <span className="text-xs font-medium text-gray-700">{opt.label}</span>
-                </label>
-              ))}
+            <div className="mt-2 flex items-center gap-3 bg-brand-50 border-2 border-brand-700 rounded-xl px-4 py-3">
+              <span className="text-xl">₮</span>
+              <span className="text-sm font-semibold text-brand-700">USDT (TRC20)</span>
             </div>
+            <input type="hidden" value="USDT_TRC20" {...register('currency')} />
           </div>
           <div>
             <Label htmlFor="amount">Amount</Label>

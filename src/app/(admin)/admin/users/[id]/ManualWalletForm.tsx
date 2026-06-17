@@ -6,14 +6,12 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
-const CURRENCIES = ['USDT_TRC20', 'BTC', 'BNB_BEP20'] as const
-
 export default function ManualWalletForm({ userId }: { userId: string }) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [form, setForm] = useState({
     type: 'MANUAL_CREDIT' as 'MANUAL_CREDIT' | 'MANUAL_DEBIT',
-    currency: 'USDT_TRC20' as typeof CURRENCIES[number],
+    currency: 'USDT_TRC20',
     amount: '',
     note: '',
   })
@@ -62,13 +60,10 @@ export default function ManualWalletForm({ userId }: { userId: string }) {
 
       <div>
         <Label className="text-xs text-gray-500">Currency</Label>
-        <select
-          value={form.currency}
-          onChange={(e) => setForm((f) => ({ ...f, currency: e.target.value as typeof CURRENCIES[number] }))}
-          className="mt-1 w-full text-sm rounded-lg border border-gray-200 bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
-        >
-          {CURRENCIES.map((c) => <option key={c} value={c}>{c}</option>)}
-        </select>
+        <div className="mt-1 flex items-center gap-2 bg-gray-50 rounded-lg border border-gray-200 px-3 py-2">
+          <span className="text-base">₮</span>
+          <span className="text-sm font-medium text-gray-700">USDT (TRC20)</span>
+        </div>
       </div>
 
       <div>
