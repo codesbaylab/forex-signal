@@ -20,6 +20,10 @@ export async function POST(request: NextRequest) {
     const wallet = await prisma.wallet.findUnique({ where: { userId_currency: { userId: user.id, currency: currency as Currency } } })
     if (!wallet) return NextResponse.json({ success: false, error: 'Wallet not found' }, { status: 404 })
 
+    if (!process.env.NOWPAYMENTS_API_KEY) {
+      return NextResponse.json({ success: false, error: 'Payment gateway not configured. Please contact support.' }, { status: 503 })
+    }
+
     const orderId = `dep_${user.id.slice(0, 8)}_${Date.now()}`
     const ipnCallbackUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/nowpayments`
 

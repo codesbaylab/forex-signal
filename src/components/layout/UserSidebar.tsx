@@ -58,16 +58,18 @@ export default function UserSidebar({ onClose }: { onClose?: () => void }) {
       <div className="flex-1 overflow-y-auto scrollbar-hide py-3">
         <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest px-5 pt-2 pb-2">Menu</p>
         {navItems.map((item) => {
-          const active = pathname === item.href || pathname.startsWith(item.href + '/')
+          const isActive = pathname === item.href ||
+            (pathname.startsWith(item.href + '/') &&
+              !navItems.some(other => other.href !== item.href && other.href.length > item.href.length && pathname.startsWith(other.href)))
           return (
             <Link key={item.href} href={item.href} onClick={handleNav}>
               <div className={cn(
                 'flex items-center gap-2.5 px-4 py-2.5 mx-2.5 rounded-xl cursor-pointer text-sm font-medium transition-all relative',
-                active
+                isActive
                   ? 'bg-brand-50 text-brand-700 font-semibold'
                   : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
               )}>
-                {active && (
+                {isActive && (
                   <span className="absolute -left-2.5 top-1/2 -translate-y-1/2 w-1 h-3/5 bg-brand-700 rounded-r-full" />
                 )}
                 <item.icon className="w-4 h-4 flex-shrink-0" />

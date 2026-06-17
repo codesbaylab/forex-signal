@@ -7,8 +7,6 @@ const BASE_URL = process.env.NOWPAYMENTS_SANDBOX === 'true'
 
 const CURRENCY_MAP: Record<string, string> = {
   USDT_TRC20: 'usdttrc20',
-  BTC: 'btc',
-  BNB_BEP20: 'bnbbsc',
 }
 
 function getClient() {
