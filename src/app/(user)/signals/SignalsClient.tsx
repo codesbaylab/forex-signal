@@ -24,7 +24,8 @@ const statusColors: Record<string, string> = {
   DRAFT: 'bg-yellow-50 text-yellow-700',
 }
 
-const FILTERS = ['All', 'BUY', 'SELL', 'ACTIVE', 'WIN', 'LOSS']
+const FILTERS_PAID = ['All', 'BUY', 'SELL', 'ACTIVE', 'WIN', 'LOSS']
+const FILTERS_FREE = ['All', 'BUY', 'SELL', 'WIN', 'LOSS']
 
 function getFirstTP(takeProfits: unknown): string {
   if (!Array.isArray(takeProfits) || takeProfits.length === 0) return '-'
@@ -42,8 +43,9 @@ function formatPrice(pair: string, price: string): string {
   return p.toFixed(5)
 }
 
-export default function SignalsClient({ signals, prices = {} }: { signals: Signal[]; prices?: Record<string, PriceData> }) {
+export default function SignalsClient({ signals, prices = {}, isPaid = false }: { signals: Signal[]; prices?: Record<string, PriceData>; isPaid?: boolean }) {
   const [active, setActive] = useState('All')
+  const FILTERS = isPaid ? FILTERS_PAID : FILTERS_FREE
 
   const filtered = signals.filter((s) => {
     if (active === 'All') return true
@@ -57,6 +59,19 @@ export default function SignalsClient({ signals, prices = {} }: { signals: Signa
 
   return (
     <>
+      {/* Upgrade banner for free users */}
+      {!isPaid && (
+        <div className="bg-gradient-to-r from-brand-800 to-brand-600 rounded-2xl p-5 mb-6 flex items-center justify-between gap-4">
+          <div>
+            <p className="font-bold text-white text-sm">You&apos;re on the free plan</p>
+            <p className="text-white/70 text-xs mt-0.5">Upgrade to Pro to see live active signals in real time.</p>
+          </div>
+          <a href="/subscription" className="shrink-0 bg-white text-brand-700 font-bold text-sm px-5 py-2 rounded-xl hover:bg-gray-100 transition-colors">
+            Upgrade →
+          </a>
+        </div>
+      )}
+
       {/* Filter Bar */}
       <div className="bg-white rounded-2xl border border-gray-100 p-4 mb-6 flex items-center gap-2 flex-wrap">
         <span className="text-sm text-gray-500 mr-1">Filter:</span>

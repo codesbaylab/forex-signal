@@ -14,8 +14,11 @@ export default async function SignalsPage() {
   const profile = await prisma.profile.findUnique({ where: { id: user.id } })
   if (!profile) redirect('/auth/login')
 
+  const activeSub = await prisma.subscription.findFirst({ where: { userId: user.id, status: 'ACTIVE' } })
+  const isPaid = !!activeSub
+
   const signals = await prisma.signal.findMany({
-    where: { status: { in: ['ACTIVE', 'TP_HIT', 'SL_HIT', 'CLOSED'] } },
+    where: { status: { in: isPaid ? ['ACTIVE', 'TP_HIT', 'SL_HIT', 'CLOSED'] : ['TP_HIT', 'SL_HIT', 'CLOSED'] } },
     orderBy: { createdAt: 'desc' },
     take: 100,
   })
@@ -35,7 +38,7 @@ export default async function SignalsPage() {
           </Link>
         }
       />
-      <SignalsClient signals={signals} prices={prices} />
+      <SignalsClient signals={signals} prices={prices} isPaid={isPaid} />
     </div>
   )
 }

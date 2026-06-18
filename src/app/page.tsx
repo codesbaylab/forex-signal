@@ -26,22 +26,25 @@ const SIGNALS = [
   { pair: 'USD/JPY', dir: 'SELL', entry: '151.820', tp: '150.500', sl: '152.400', status: 'ACTIVE', pips: '+132', time: '3h ago' },
 ]
 
-const FEATURES = [
-  { icon: '⚡', title: 'Instant Signals', desc: 'BUY/SELL alerts with entry, TP and SL the moment our AI detects opportunity.' },
-  { icon: '🔐', title: 'USDT Wallet', desc: 'Built-in USDT (TRC20) wallet. Deposit, withdraw or transfer instantly.' },
-  { icon: '📊', title: 'Technical AI', desc: 'RSI, MACD, EMA and Bollinger Bands analyzed 24/7 across all major pairs.' },
-  { icon: '🌐', title: 'All Major Pairs', desc: 'Forex & gold — 10 instruments covered with real-time price feeds.' },
-  { icon: '🎁', title: 'Referral Income', desc: 'Earn multi-level commissions when your network subscribes.' },
-  { icon: '📈', title: 'Signal History', desc: 'Full win/loss history with detailed analytics on every signal ever posted.' },
+const FREE_FEATURES = [
+  { icon: '📡', title: 'Live Price Feed', desc: 'XAU/USD, EUR/USD, GBP/USD & USD/JPY updated every 5 minutes.' },
+  { icon: '🔐', title: 'USDT Wallet', desc: 'Built-in USDT TRC20 wallet — deposit, withdraw and transfer freely.' },
+  { icon: '📈', title: 'Signal History', desc: 'Browse all closed signals with entry, TP, SL and final result.' },
+]
+
+const PRO_FEATURES = [
+  { icon: '⚡', title: 'Live Active Signals', desc: 'Real-time BUY/SELL alerts with entry, TP and SL the moment they are published.' },
+  { icon: '🎁', title: 'Referral Commissions', desc: 'Get your unique referral link and earn multi-level commissions on every paid subscription in your network.' },
+  { icon: '📊', title: 'Technical AI Analysis', desc: 'RSI, MACD, EMA and Bollinger Bands analyzed 24/7 across XAU/USD and major forex pairs.' },
 ]
 
 type LivePlan = { id: string; name: string; price: number; features: string[] }
 
 const STATS = [
-  { value: '12,847+', label: 'Active Traders' },
-  { value: '89%', label: 'Win Rate' },
+  { value: 'Free', label: 'To Join' },
+  { value: '89%', label: 'Signal Win Rate' },
   { value: '3,200+', label: 'Signals / Month' },
-  { value: 'Multi-Level', label: 'Referral System' },
+  { value: 'USDT', label: 'TRC20 Payments' },
 ]
 
 /* ─── helpers ─── */
@@ -285,7 +288,7 @@ export default function LandingPage() {
             initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4, ease }}
           >
-            Professional BUY/SELL signals for forex & gold. Precision entry, TP and SL — delivered the moment an opportunity appears.
+            Sign up free and explore the platform. Upgrade to Pro to unlock live signals and start earning through our referral program.
           </motion.p>
 
           <motion.div
@@ -391,20 +394,55 @@ export default function LandingPage() {
       <section id="features" className="py-20 px-6 border-y border-white/5 bg-white/[0.015]">
         <div className="max-w-6xl mx-auto">
           <ScrollReveal className="text-center mb-14">
-            <div className="inline-block bg-green-500/10 border border-green-500/20 text-green-400 text-xs font-bold px-3 py-1 rounded-full mb-4">FEATURES</div>
-            <h2 className="text-4xl md:text-5xl font-black text-white mb-3">Everything you need to win</h2>
-            <p className="text-white/45 text-lg">Built for serious traders. No noise, just edge.</p>
+            <div className="inline-block bg-green-500/10 border border-green-500/20 text-green-400 text-xs font-bold px-3 py-1 rounded-full mb-4">WHAT YOU GET</div>
+            <h2 className="text-4xl md:text-5xl font-black text-white mb-3">Free to start. Powerful when you&apos;re ready.</h2>
+            <p className="text-white/45 text-lg">No credit card needed. Upgrade only when it makes sense for you.</p>
           </ScrollReveal>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {FEATURES.map((f, i) => (
-              <ScrollReveal key={f.title} delay={i * 0.08}>
-                <TiltCard className="group bg-white/5 hover:bg-white/[0.08] border border-white/10 hover:border-green-500/30 rounded-2xl p-6 transition-colors duration-300 cursor-default h-full">
-                  <div className="text-3xl mb-4">{f.icon}</div>
-                  <h3 className="font-bold text-white text-lg mb-2">{f.title}</h3>
-                  <p className="text-white/45 text-sm leading-relaxed">{f.desc}</p>
-                </TiltCard>
-              </ScrollReveal>
-            ))}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            {/* Free column */}
+            <ScrollReveal delay={0}>
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-7 h-full">
+                <div className="inline-block bg-white/10 text-white/70 text-xs font-bold px-3 py-1 rounded-full mb-6">FREE — ALWAYS</div>
+                <div className="space-y-5">
+                  {FREE_FEATURES.map((f) => (
+                    <div key={f.title} className="flex gap-4">
+                      <span className="text-2xl shrink-0">{f.icon}</span>
+                      <div>
+                        <p className="font-bold text-white text-sm mb-1">{f.title}</p>
+                        <p className="text-white/45 text-xs leading-relaxed">{f.desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-8 pt-6 border-t border-white/10">
+                  <p className="text-white/30 text-xs text-center">No subscription required</p>
+                </div>
+              </div>
+            </ScrollReveal>
+
+            {/* Pro column */}
+            <ScrollReveal delay={0.1}>
+              <div className="bg-gradient-to-b from-green-600/30 to-green-900/30 border border-green-500/30 rounded-2xl p-7 h-full relative">
+                <div className="inline-block bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full mb-6">PRO — UNLOCK EVERYTHING</div>
+                <div className="space-y-5">
+                  {PRO_FEATURES.map((f) => (
+                    <div key={f.title} className="flex gap-4">
+                      <span className="text-2xl shrink-0">{f.icon}</span>
+                      <div>
+                        <p className="font-bold text-white text-sm mb-1">{f.title}</p>
+                        <p className="text-white/45 text-xs leading-relaxed">{f.desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-8 pt-6 border-t border-white/10">
+                  <a href="/auth/register" className="block text-center bg-green-500 hover:bg-green-400 text-white font-bold py-3 rounded-xl transition-colors text-sm">
+                    Start Free → Upgrade Anytime
+                  </a>
+                </div>
+              </div>
+            </ScrollReveal>
           </div>
         </div>
       </section>
@@ -499,8 +537,8 @@ export default function LandingPage() {
               <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: 'linear-gradient(#22c55e 1px, transparent 1px), linear-gradient(90deg, #22c55e 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
               <div className="relative z-10">
                 <div className="text-5xl mb-5">🎁</div>
-                <h2 className="text-3xl md:text-4xl font-black text-white mb-3">Earn While You Sleep</h2>
-                <p className="text-white/55 text-lg mb-8 max-w-xl mx-auto">Share your referral link and earn multi-level commissions — every time your network subscribes.</p>
+                <h2 className="text-3xl md:text-4xl font-black text-white mb-3">Earn While You Trade</h2>
+                <p className="text-white/55 text-lg mb-8 max-w-xl mx-auto">Pro subscribers get a unique referral link. Every time someone in your network pays, you earn — automatically, across multiple levels.</p>
                 <Link href="/auth/register" className="inline-block bg-gradient-to-r from-green-500 to-green-700 hover:from-green-400 hover:to-green-600 text-white font-bold px-10 py-4 rounded-2xl transition-all duration-300 hover:scale-110 shadow-xl shadow-green-900/40">
                   Start Earning Now →
                 </Link>

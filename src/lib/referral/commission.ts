@@ -39,6 +39,15 @@ export async function distributeCommissions(subscriptionId: string): Promise<voi
       continue
     }
 
+    // Only credit users who have an active paid subscription
+    const uplineHasPaidSub = await prisma.subscription.count({
+      where: { userId: uplineUser.id, status: 'ACTIVE' },
+    })
+    if (!uplineHasPaidSub) {
+      currentUserId = uplineUser.id
+      continue
+    }
+
     // Calculate commission amount
     let commissionAmount: Decimal
     if (levelConfig.commissionType === CommissionType.PERCENTAGE) {

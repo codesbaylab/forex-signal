@@ -8,6 +8,29 @@ export default async function CommissionsPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
 
+  const activeSub = await prisma.subscription.findFirst({ where: { userId: user.id, status: 'ACTIVE' } })
+  const isPaid = !!activeSub
+
+  if (!isPaid) {
+    return (
+      <div>
+        <PageHeader title="Commissions" subtitle="Your referral commission earnings" />
+        <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center max-w-lg mx-auto mt-10">
+          <div className="w-16 h-16 bg-brand-50 rounded-2xl flex items-center justify-center mx-auto mb-5">
+            <span className="text-3xl">💰</span>
+          </div>
+          <h2 className="font-bold text-gray-900 text-xl mb-2">Pro Feature</h2>
+          <p className="text-gray-500 text-sm mb-6 leading-relaxed">
+            Commission earnings are exclusive to Pro subscribers. Upgrade to unlock the referral program and earn on every subscription your network makes.
+          </p>
+          <a href="/subscription" className="inline-block bg-brand-700 hover:bg-brand-800 text-white font-bold px-8 py-3 rounded-xl transition-colors">
+            Upgrade to Pro →
+          </a>
+        </div>
+      </div>
+    )
+  }
+
   const commissions = await prisma.commission.findMany({
     where: { recipientUserId: user.id },
     include: {
