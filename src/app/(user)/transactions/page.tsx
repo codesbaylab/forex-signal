@@ -72,7 +72,7 @@ export default async function TransactionsPage() {
                   <td className="px-5 py-3 text-gray-500 text-xs">{tx.note ?? tx.reference ?? '-'}</td>
                   <td className="px-5 py-3">
                     <span className={`font-semibold ${CREDIT_TYPES.includes(tx.type) ? 'text-green-600' : 'text-red-500'}`}>
-                      {CREDIT_TYPES.includes(tx.type) ? '+' : '-'}{Number(tx.amount).toFixed(8)}
+                      {CREDIT_TYPES.includes(tx.type) ? '+' : '-'}{Number(tx.amount).toFixed(2)}
                     </span>
                   </td>
                   <td className="px-5 py-3 text-gray-600 text-xs">{tx.currency}</td>

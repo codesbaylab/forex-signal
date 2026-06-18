@@ -71,7 +71,7 @@ export default async function CommissionsPage() {
                     <span className="text-xs bg-brand-50 text-brand-700 font-semibold px-2 py-0.5 rounded-full">L{c.level}</span>
                   </td>
                   <td className="px-5 py-3 text-gray-700 text-xs">{c.subscription.plan.name}</td>
-                  <td className="px-5 py-3 font-semibold text-green-600">+{Number(c.amount).toFixed(8)}</td>
+                  <td className="px-5 py-3 font-semibold text-green-600">+{Number(c.amount).toFixed(2)}</td>
                   <td className="px-5 py-3 text-gray-500 text-xs">{c.currency}</td>
                   <td className="px-5 py-3">
                     <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${c.status === 'PAID' ? 'bg-green-50 text-green-700' : 'bg-yellow-50 text-yellow-700'}`}>

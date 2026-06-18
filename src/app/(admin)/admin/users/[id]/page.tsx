@@ -60,8 +60,8 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
               <div key={w.id} className="flex justify-between items-center">
                 <span className="text-xs text-gray-500">{w.currency}</span>
                 <div className="text-right">
-                  <p className="text-sm font-semibold text-gray-900">{Number(w.balance).toFixed(8)}</p>
-                  {Number(w.lockedBalance) > 0 && <p className="text-xs text-orange-500">Locked: {Number(w.lockedBalance).toFixed(8)}</p>}
+                  <p className="text-sm font-semibold text-gray-900">{Number(w.balance).toFixed(2)}</p>
+                  {Number(w.lockedBalance) > 0 && <p className="text-xs text-orange-500">Locked: {Number(w.lockedBalance).toFixed(2)}</p>}
                 </div>
               </div>
             ))}
@@ -95,7 +95,7 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
             <div key={tx.id} className="flex justify-between text-sm py-2 border-b border-gray-50 last:border-0">
               <span className="text-gray-700">{tx.type}</span>
               <span className={`font-semibold ${['DEPOSIT','TRANSFER_IN','COMMISSION','MANUAL_CREDIT'].includes(tx.type) ? 'text-green-600' : 'text-red-500'}`}>
-                {Number(tx.amount).toFixed(8)} {tx.currency}
+                {Number(tx.amount).toFixed(2)} {tx.currency}
               </span>
             </div>
           ))}

@@ -55,12 +55,12 @@ export default async function WalletPage() {
             </div>
             <div className="mb-4">
               <p className="text-xs text-gray-400 mb-1">Available Balance</p>
-              <p className="text-2xl font-extrabold text-gray-900">{Number(wallet.balance).toFixed(8)}</p>
+              <p className="text-2xl font-extrabold text-gray-900">{Number(wallet.balance).toFixed(2)}</p>
             </div>
             {Number(wallet.lockedBalance) > 0 && (
               <div className="mb-4">
                 <p className="text-xs text-gray-400 mb-1">Locked</p>
-                <p className="text-sm font-semibold text-orange-500">{Number(wallet.lockedBalance).toFixed(8)}</p>
+                <p className="text-sm font-semibold text-orange-500">{Number(wallet.lockedBalance).toFixed(2)}</p>
               </div>
             )}
             <div className="flex gap-2 flex-wrap">
@@ -126,7 +126,7 @@ export default async function WalletPage() {
               </div>
               <div className="text-right">
                 <p className={`text-sm font-semibold ${['DEPOSIT','TRANSFER_IN','COMMISSION','MANUAL_CREDIT'].includes(tx.type) ? 'text-green-600' : 'text-red-500'}`}>
-                  {['DEPOSIT','TRANSFER_IN','COMMISSION','MANUAL_CREDIT'].includes(tx.type) ? '+' : '-'}{Number(tx.amount).toFixed(8)} {tx.currency}
+                  {['DEPOSIT','TRANSFER_IN','COMMISSION','MANUAL_CREDIT'].includes(tx.type) ? '+' : '-'}{Number(tx.amount).toFixed(2)} {tx.currency}
                 </p>
                 <p className="text-xs text-gray-400">{new Date(tx.createdAt).toLocaleDateString()}</p>
               </div>

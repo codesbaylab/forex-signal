@@ -64,7 +64,7 @@ export default async function AdminDashboardPage() {
                   <p className="text-sm font-medium text-gray-900">{w.user.name}</p>
                   <p className="text-xs text-gray-400">{w.currency}</p>
                 </div>
-                <span className="text-sm font-semibold text-orange-600">{Number(w.amount).toFixed(8)}</span>
+                <span className="text-sm font-semibold text-orange-600">{Number(w.amount).toFixed(2)}</span>
               </div>
             ))}
           </div>
