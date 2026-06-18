@@ -48,7 +48,7 @@ export default async function AdminDepositsPage() {
             <thead>
               <tr className="bg-gray-50 border-b border-gray-100">
                 <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500">User</th>
-                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500">Amount</th>
+                <th className="text-right px-5 py-3 text-xs font-semibold text-gray-500">Amount</th>
                 <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500">Status</th>
                 <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500">TX Hash</th>
                 <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500">Date</th>
@@ -65,7 +65,7 @@ export default async function AdminDepositsPage() {
                     <p className="font-medium text-gray-900">{d.user.name}</p>
                     <p className="text-xs text-gray-400">{d.user.email}</p>
                   </td>
-                  <td className="px-5 py-3 font-semibold text-gray-900">{Number(d.amount).toFixed(2)} USDT</td>
+                  <td className="px-5 py-3 font-semibold text-gray-900 text-right">{Number(d.amount).toFixed(2)} USDT</td>
                   <td className="px-5 py-3">
                     <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${statusColors[d.status] ?? 'bg-gray-100 text-gray-500'}`}>
                       {d.status}

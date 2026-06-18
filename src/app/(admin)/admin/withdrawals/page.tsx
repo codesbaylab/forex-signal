@@ -34,7 +34,7 @@ export default async function AdminWithdrawalsPage() {
               <tr className="bg-gray-50 border-b border-gray-100">
                 <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500">User</th>
                 <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500">Currency</th>
-                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500">Amount</th>
+                <th className="text-right px-5 py-3 text-xs font-semibold text-gray-500">Amount</th>
                 <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500">Address</th>
                 <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500">Status</th>
                 <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500">Date</th>
@@ -49,7 +49,7 @@ export default async function AdminWithdrawalsPage() {
                 <tr key={w.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
                   <td className="px-5 py-3"><p className="font-medium text-gray-900">{w.user.name}</p><p className="text-xs text-gray-400">{w.user.email}</p></td>
                   <td className="px-5 py-3 text-xs text-gray-600">{w.currency}</td>
-                  <td className="px-5 py-3 font-semibold text-gray-900">{Number(w.amount).toFixed(2)}</td>
+                  <td className="px-5 py-3 font-semibold text-gray-900 text-right">{Number(w.amount).toFixed(2)}</td>
                   <td className="px-5 py-3"><p className="font-mono text-xs text-gray-500 truncate max-w-[120px]">{w.toAddress}</p></td>
                   <td className="px-5 py-3">
                     <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${statusColors[w.status] ?? 'bg-gray-100 text-gray-500'}`}>{w.status}</span>

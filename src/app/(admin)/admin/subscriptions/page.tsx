@@ -35,7 +35,7 @@ export default async function AdminSubscriptionsPage() {
                 <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500">Status</th>
                 <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500">Started</th>
                 <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500">Expires</th>
-                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500">Amount</th>
+                <th className="text-right px-5 py-3 text-xs font-semibold text-gray-500">Amount</th>
               </tr>
             </thead>
             <tbody>
@@ -46,7 +46,7 @@ export default async function AdminSubscriptionsPage() {
                   <td className="px-5 py-3"><span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${statusColors[s.status] ?? 'bg-gray-100 text-gray-500'}`}>{s.status}</span></td>
                   <td className="px-5 py-3 text-xs text-gray-400">{s.startedAt ? new Date(s.startedAt).toLocaleDateString() : '-'}</td>
                   <td className="px-5 py-3 text-xs text-gray-400">{s.expiresAt ? new Date(s.expiresAt).toLocaleDateString() : '-'}</td>
-                  <td className="px-5 py-3 font-semibold text-gray-900">{Number(s.paidAmount).toFixed(2)} {s.paidCurrency}</td>
+                  <td className="px-5 py-3 font-semibold text-gray-900 text-right">{Number(s.paidAmount).toFixed(2)} {s.paidCurrency}</td>
                 </tr>
               ))}
             </tbody>

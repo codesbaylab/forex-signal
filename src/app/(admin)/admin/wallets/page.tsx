@@ -26,8 +26,8 @@ export default async function AdminWalletsPage() {
               <tr className="bg-gray-50 border-b border-gray-100">
                 <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500">User</th>
                 <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500">Currency</th>
-                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500">Balance</th>
-                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500">Locked</th>
+                <th className="text-right px-5 py-3 text-xs font-semibold text-gray-500">Balance</th>
+                <th className="text-right px-5 py-3 text-xs font-semibold text-gray-500">Locked</th>
                 <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500">Updated</th>
               </tr>
             </thead>
@@ -39,8 +39,8 @@ export default async function AdminWalletsPage() {
                     <p className="text-xs text-gray-400">{w.user.email}</p>
                   </td>
                   <td className="px-5 py-3 text-xs font-medium text-gray-700">{w.currency}</td>
-                  <td className="px-5 py-3 font-semibold text-gray-900">{Number(w.balance).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                  <td className="px-5 py-3 text-orange-500">{Number(w.lockedBalance).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                  <td className="px-5 py-3 font-semibold text-gray-900 text-right">{Number(w.balance).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                  <td className="px-5 py-3 text-orange-500 text-right">{Number(w.lockedBalance).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                   <td className="px-5 py-3 text-xs text-gray-400">{new Date(w.updatedAt).toLocaleDateString()}</td>
                 </tr>
               ))}

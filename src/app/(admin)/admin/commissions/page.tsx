@@ -44,7 +44,7 @@ export default async function AdminCommissionsPage() {
                 <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500">From</th>
                 <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500">Level</th>
                 <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500">Plan</th>
-                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500">Amount</th>
+                <th className="text-right px-5 py-3 text-xs font-semibold text-gray-500">Amount</th>
                 <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500">Date</th>
               </tr>
             </thead>
@@ -58,7 +58,7 @@ export default async function AdminCommissionsPage() {
                   <td className="px-5 py-3"><p className="text-gray-700">{c.source.name}</p></td>
                   <td className="px-5 py-3"><span className="text-xs bg-brand-50 text-brand-700 font-semibold px-2 py-0.5 rounded-full">L{c.level}</span></td>
                   <td className="px-5 py-3 text-xs text-gray-600">{c.subscription.plan.name}</td>
-                  <td className="px-5 py-3 font-semibold text-green-600">+{Number(c.amount).toFixed(2)} {c.currency}</td>
+                  <td className="px-5 py-3 font-semibold text-green-600 text-right">+{Number(c.amount).toFixed(2)} {c.currency}</td>
                   <td className="px-5 py-3 text-xs text-gray-400">{new Date(c.createdAt).toLocaleDateString()}</td>
                 </tr>
               ))}

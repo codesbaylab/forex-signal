@@ -28,7 +28,7 @@ export default async function AdminTransactionsPage() {
               <tr className="bg-gray-50 border-b border-gray-100">
                 <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500">User</th>
                 <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500">Type</th>
-                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500">Amount</th>
+                <th className="text-right px-5 py-3 text-xs font-semibold text-gray-500">Amount</th>
                 <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500">Currency</th>
                 <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500">Status</th>
                 <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500">Date</th>
@@ -45,7 +45,7 @@ export default async function AdminTransactionsPage() {
                     <p className="text-xs text-gray-400">{tx.user.email}</p>
                   </td>
                   <td className="px-5 py-3 text-xs text-gray-600">{tx.type}</td>
-                  <td className="px-5 py-3">
+                  <td className="px-5 py-3 text-right">
                     <span className={`font-semibold text-sm ${CREDIT_TYPES.includes(tx.type) ? 'text-green-600' : 'text-red-500'}`}>
                       {CREDIT_TYPES.includes(tx.type) ? '+' : '-'}{Number(tx.amount).toFixed(2)}
                     </span>
