@@ -191,7 +191,14 @@ export default async function DashboardPage() {
         <div className="bg-white rounded-2xl border border-gray-100 p-5 mb-7">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-bold text-gray-900">Live Prices</h2>
-            <span className="text-xs text-gray-400">Updates every 15 min</span>
+            <div className="text-right">
+              <p className="text-xs text-gray-400">Updates every 5 min</p>
+              {Object.values(liveprices)[0]?.updatedAt && (
+                <p className="text-xs text-gray-300">
+                  Last updated: {new Date(Object.values(liveprices)[0].updatedAt).toLocaleTimeString()}
+                </p>
+              )}
+            </div>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
             {Object.entries(liveprices).map(([pair, data]) => {
