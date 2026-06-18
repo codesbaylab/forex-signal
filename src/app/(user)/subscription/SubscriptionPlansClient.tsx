@@ -136,7 +136,7 @@ export default function SubscriptionPlansClient({ plans, currentPlanId, annualDi
                   <p className="text-xs text-gray-400 mt-0.5">Billed as <span className="font-semibold text-gray-600">${totalCharge}/year</span></p>
                 ) : (
                   <p className="text-xs text-gray-400 mt-0.5">
-                    or <span className="font-semibold text-green-600">${annualMonthlyPrice(monthlyPrice)}/mo</span> billed annually
+                    or <span className="font-semibold text-green-600">${annualMonthlyPrice(monthlyPrice, annualDiscountPct)}/mo</span> billed annually
                   </p>
                 )}
               </div>
