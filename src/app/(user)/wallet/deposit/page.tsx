@@ -23,6 +23,7 @@ export default function DepositPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
+  const [submitResult, setSubmitResult] = useState<{ auto: boolean; message: string } | null>(null)
 
   const { register, handleSubmit, formState: { errors } } = useForm<DepositInput>({
     resolver: zodResolver(DepositSchema),
@@ -66,6 +67,7 @@ export default function DepositPage() {
       })
       const json = await res.json()
       if (!json.success) throw new Error(json.error)
+      setSubmitResult({ auto: json.auto === true, message: json.message })
       setStep('submitted')
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to submit')
@@ -86,6 +88,7 @@ export default function DepositPage() {
     setManualData(null)
     setTxHash('')
     setError(null)
+    setSubmitResult(null)
   }
 
   return (
@@ -207,11 +210,15 @@ export default function DepositPage() {
       {/* Step 3 — Submitted */}
       {step === 'submitted' && (
         <div className="bg-white rounded-2xl border border-gray-100 p-7 text-center">
-          <div className="w-14 h-14 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-4">
-            <Check className="w-7 h-7 text-green-600" />
+          <div className={`w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4 ${submitResult?.auto ? 'bg-green-50' : 'bg-yellow-50'}`}>
+            <Check className={`w-7 h-7 ${submitResult?.auto ? 'text-green-600' : 'text-yellow-600'}`} />
           </div>
-          <h2 className="font-bold text-gray-900 text-lg mb-2">Deposit Submitted</h2>
-          <p className="text-sm text-gray-500 mb-6">Your deposit is pending admin verification. Your wallet will be credited once confirmed — usually within 1–24 hours.</p>
+          <h2 className="font-bold text-gray-900 text-lg mb-2">
+            {submitResult?.auto ? 'Deposit Credited!' : 'Deposit Submitted'}
+          </h2>
+          <p className="text-sm text-gray-500 mb-6">
+            {submitResult?.message ?? 'Your deposit is being verified and will be credited shortly.'}
+          </p>
           <Button onClick={reset} variant="outline">Make another deposit</Button>
         </div>
       )}
