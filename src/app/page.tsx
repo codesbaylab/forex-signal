@@ -11,31 +11,31 @@ import {
 } from 'framer-motion'
 
 /* ─── data ─── */
-const TICKER = [
-  { pair: 'EUR/USD', dir: 'BUY', change: '+0.42%', price: '1.0842' },
-  { pair: 'GBP/JPY', dir: 'SELL', change: '-0.81%', price: '196.34' },
-  { pair: 'XAU/USD', dir: 'BUY', change: '+1.23%', price: '2341.50' },
-  { pair: 'BTC/USD', dir: 'BUY', change: '+3.17%', price: '68,420' },
-  { pair: 'USD/JPY', dir: 'SELL', change: '-0.55%', price: '151.82' },
-  { pair: 'GBP/USD', dir: 'BUY', change: '+0.29%', price: '1.2654' },
-  { pair: 'AUD/USD', dir: 'SELL', change: '-0.38%', price: '0.6521' },
-  { pair: 'ETH/USD', dir: 'BUY', change: '+2.44%', price: '3,812' },
-  { pair: 'USD/CHF', dir: 'SELL', change: '-0.19%', price: '0.9012' },
-  { pair: 'NZD/USD', dir: 'BUY', change: '+0.61%', price: '0.6134' },
+const TICKER_FALLBACK = [
+  { pair: 'EUR/USD', dir: 'BUY',  change: '+0.42%', price: '1.08420' },
+  { pair: 'GBP/JPY', dir: 'SELL', change: '-0.81%', price: '196.340' },
+  { pair: 'XAU/USD', dir: 'BUY',  change: '+1.23%', price: '2341.50' },
+  { pair: 'USD/JPY', dir: 'SELL', change: '-0.55%', price: '151.820' },
+  { pair: 'GBP/USD', dir: 'BUY',  change: '+0.29%', price: '1.26540' },
+  { pair: 'AUD/USD', dir: 'SELL', change: '-0.38%', price: '0.65210' },
+  { pair: 'USD/CHF', dir: 'SELL', change: '-0.19%', price: '0.90120' },
+  { pair: 'NZD/USD', dir: 'BUY',  change: '+0.61%', price: '0.61340' },
+  { pair: 'USD/CAD', dir: 'BUY',  change: '+0.18%', price: '1.36450' },
+  { pair: 'EUR/GBP', dir: 'SELL', change: '-0.12%', price: '0.85620' },
 ]
 
 const SIGNALS = [
-  { pair: 'EUR/USD', dir: 'BUY', entry: '1.0842', tp: '1.0910', sl: '1.0800', status: 'ACTIVE', pips: '+68', time: '2m ago' },
-  { pair: 'GBP/JPY', dir: 'SELL', entry: '196.34', tp: '195.10', sl: '197.20', status: 'ACTIVE', pips: '+124', time: '8m ago' },
-  { pair: 'XAU/USD', dir: 'BUY', entry: '2341.50', tp: '2380.00', sl: '2315.00', status: 'WIN', pips: '+385', time: '1h ago' },
-  { pair: 'BTC/USD', dir: 'BUY', entry: '68,420', tp: '72,000', sl: '65,000', status: 'ACTIVE', pips: '+3580', time: '3h ago' },
+  { pair: 'EUR/USD', dir: 'BUY',  entry: '1.08420', tp: '1.09100', sl: '1.08000', status: 'ACTIVE', pips: '+68',  time: '2m ago' },
+  { pair: 'GBP/JPY', dir: 'SELL', entry: '196.340', tp: '195.100', sl: '197.200', status: 'ACTIVE', pips: '+124', time: '8m ago' },
+  { pair: 'XAU/USD', dir: 'BUY',  entry: '2341.50', tp: '2380.00', sl: '2315.00', status: 'WIN',    pips: '+385', time: '1h ago' },
+  { pair: 'GBP/USD', dir: 'SELL', entry: '1.26540', tp: '1.25800', sl: '1.27100', status: 'ACTIVE', pips: '+74',  time: '3h ago' },
 ]
 
 const FEATURES = [
   { icon: '⚡', title: 'Instant Signals', desc: 'BUY/SELL alerts with entry, TP and SL the moment our AI detects opportunity.' },
-  { icon: '🔐', title: 'Crypto Wallet', desc: 'Built-in USDT, BTC & BNB wallet. Deposit, withdraw or transfer instantly.' },
+  { icon: '🔐', title: 'USDT Wallet', desc: 'Built-in USDT (TRC20) wallet. Deposit, withdraw or transfer instantly.' },
   { icon: '📊', title: 'Technical AI', desc: 'RSI, MACD, EMA and Bollinger Bands analyzed 24/7 across all major pairs.' },
-  { icon: '🌐', title: 'All Major Pairs', desc: 'Forex, gold, crypto — 40+ instruments covered with real-time price feeds.' },
+  { icon: '🌐', title: 'All Major Pairs', desc: 'Forex & gold — 10 instruments covered with real-time price feeds.' },
   { icon: '🎁', title: 'Referral Income', desc: 'Earn multi-level commissions when your network subscribes. Up to 4 levels deep.' },
   { icon: '📈', title: 'Signal History', desc: 'Full win/loss history with detailed analytics on every signal ever posted.' },
 ]
@@ -105,13 +105,44 @@ function TiltCard({ children, className = '' }: { children: React.ReactNode; cla
   )
 }
 
+function formatLandingPrice(pair: string, price: string): string {
+  const p = parseFloat(price)
+  if (pair.includes('JPY')) return p.toFixed(3)
+  if (pair.startsWith('XAU')) return p.toFixed(2)
+  return p.toFixed(5)
+}
+
 /* ─── page ─── */
 export default function LandingPage() {
   const [scrolled, setScrolled] = useState(false)
+  const [ticker, setTicker] = useState(TICKER_FALLBACK)
+
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 30)
     window.addEventListener('scroll', fn)
     return () => window.removeEventListener('scroll', fn)
+  }, [])
+
+  useEffect(() => {
+    fetch('/api/forex/prices')
+      .then((r) => r.json())
+      .then((json) => {
+        if (!json.data || Object.keys(json.data).length === 0) return
+        setTicker((prev) =>
+          prev.map((t) => {
+            const live = json.data[t.pair]
+            if (!live) return t
+            const pct = parseFloat(live.pct)
+            return {
+              pair: t.pair,
+              dir: pct >= 0 ? 'BUY' : 'SELL',
+              price: formatLandingPrice(t.pair, live.price),
+              change: `${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%`,
+            }
+          })
+        )
+      })
+      .catch(() => {})
   }, [])
 
   const heroRef = useRef<HTMLElement>(null)
@@ -121,7 +152,7 @@ export default function LandingPage() {
   const heroScale = useTransform(scrollYProgress, [0, 1], [1, 0.88])
   const heroRotateX = useTransform(scrollYProgress, [0, 0.6], [0, 8])
 
-  const doubled = [...TICKER, ...TICKER]
+  const doubled = [...ticker, ...ticker]
 
   return (
     <div className="min-h-screen bg-[#050f09] text-white overflow-x-hidden">

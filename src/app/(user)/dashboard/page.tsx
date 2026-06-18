@@ -50,12 +50,21 @@ export default async function DashboardPage() {
 
   const totalReferrals = await prisma.profile.count({ where: { referredById: user.id } })
 
+  // Real market session hours (UTC)
+  const nowUTC = new Date()
+  const h = nowUTC.getUTCHours()
+  const m = nowUTC.getUTCMinutes()
+  const hm = h * 60 + m
   const marketSessions = [
-    { name: 'Sydney', isOpen: false },
-    { name: 'Tokyo', isOpen: true },
-    { name: 'London', isOpen: true },
-    { name: 'New York', isOpen: false },
+    { name: 'Sydney',   isOpen: hm >= 21 * 60 + 0 || hm < 6 * 60 + 0 },
+    { name: 'Tokyo',    isOpen: hm >= 23 * 60 + 0 || hm < 8 * 60 + 0 },
+    { name: 'London',   isOpen: hm >= 7 * 60 + 0 && hm < 16 * 60 + 0 },
+    { name: 'New York', isOpen: hm >= 12 * 60 + 0 && hm < 21 * 60 + 0 },
   ]
+
+  const pricesSetting = await prisma.setting.findUnique({ where: { key: 'forex_prices' } })
+  const liveprices: Record<string, { price: string; pct: string; dir: string }> =
+    pricesSetting?.value ? JSON.parse(pricesSetting.value) : {}
 
   return (
     <div>
@@ -176,6 +185,33 @@ export default async function DashboardPage() {
           ))}
         </div>
       </div>
+
+      {/* Live Prices */}
+      {Object.keys(liveprices).length > 0 && (
+        <div className="bg-white rounded-2xl border border-gray-100 p-5 mb-7">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-bold text-gray-900">Live Prices</h2>
+            <span className="text-xs text-gray-400">Updates every 15 min</span>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+            {Object.entries(liveprices).map(([pair, data]) => {
+              const up = data.dir === 'up'
+              const pct = parseFloat(data.pct)
+              const p = parseFloat(data.price)
+              const formatted = pair.includes('JPY') ? p.toFixed(3) : pair.startsWith('XAU') ? p.toFixed(2) : p.toFixed(5)
+              return (
+                <div key={pair} className="bg-gray-50 rounded-xl p-3">
+                  <p className="text-xs font-semibold text-gray-500 mb-1">{pair}</p>
+                  <p className="font-bold text-gray-900 text-sm">{formatted}</p>
+                  <p className={`text-xs font-semibold mt-0.5 ${up ? 'text-green-600' : 'text-red-500'}`}>
+                    {up ? '▲' : '▼'} {Math.abs(pct).toFixed(2)}%
+                  </p>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Referral Summary */}
       <div className="bg-white rounded-2xl border border-gray-100 p-5">

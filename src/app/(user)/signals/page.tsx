@@ -20,6 +20,10 @@ export default async function SignalsPage() {
     take: 100,
   })
 
+  const pricesSetting = await prisma.setting.findUnique({ where: { key: 'forex_prices' } })
+  const prices: Record<string, { price: string; pct: string; dir: string }> =
+    pricesSetting?.value ? JSON.parse(pricesSetting.value) : {}
+
   return (
     <div>
       <PageHeader
@@ -31,7 +35,7 @@ export default async function SignalsPage() {
           </Link>
         }
       />
-      <SignalsClient signals={signals} />
+      <SignalsClient signals={signals} prices={prices} />
     </div>
   )
 }

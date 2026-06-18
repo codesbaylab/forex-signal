@@ -33,7 +33,16 @@ function getFirstTP(takeProfits: unknown): string {
   return val !== undefined && val !== null ? Number(val).toFixed(5) : '-'
 }
 
-export default function SignalsClient({ signals }: { signals: Signal[] }) {
+type PriceData = { price: string; pct: string; dir: string }
+
+function formatPrice(pair: string, price: string): string {
+  const p = parseFloat(price)
+  if (pair.includes('JPY')) return p.toFixed(3)
+  if (pair.startsWith('XAU')) return p.toFixed(2)
+  return p.toFixed(5)
+}
+
+export default function SignalsClient({ signals, prices = {} }: { signals: Signal[]; prices?: Record<string, PriceData> }) {
   const [active, setActive] = useState('All')
 
   const filtered = signals.filter((s) => {
@@ -77,7 +86,7 @@ export default function SignalsClient({ signals }: { signals: Signal[] }) {
         {filtered.map((signal) => (
           <Link key={signal.id} href={`/signals/${signal.id}`}>
             <div className="bg-white rounded-2xl border border-gray-100 p-5 hover:shadow-md transition-all hover:border-brand-200 cursor-pointer">
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                   <span className="font-extrabold text-gray-900 text-lg">{signal.pair}</span>
                   <span className={`text-xs font-bold px-2 py-0.5 rounded-md ${signal.direction === 'BUY' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'}`}>
@@ -88,6 +97,15 @@ export default function SignalsClient({ signals }: { signals: Signal[] }) {
                   {signal.status === 'TP_HIT' ? 'TP HIT' : signal.status === 'SL_HIT' ? 'SL HIT' : signal.status}
                 </span>
               </div>
+              {prices[signal.pair] && (
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-xs text-gray-400">Now</span>
+                  <span className="text-sm font-bold text-gray-800">{formatPrice(signal.pair, prices[signal.pair].price)}</span>
+                  <span className={`text-xs font-semibold ${prices[signal.pair].dir === 'up' ? 'text-green-600' : 'text-red-500'}`}>
+                    {prices[signal.pair].dir === 'up' ? '▲' : '▼'} {Math.abs(parseFloat(prices[signal.pair].pct)).toFixed(2)}%
+                  </span>
+                </div>
+              )}
 
               <div className="grid grid-cols-3 gap-3 mb-4">
                 <div>
