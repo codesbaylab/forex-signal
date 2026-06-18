@@ -40,13 +40,23 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     const admin = await requireAdmin()
     if (!admin) return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 })
 
+    // Block if any user currently has an active subscription on this plan
+    const activeSubs = await prisma.subscription.count({ where: { planId: id, status: 'ACTIVE' } })
+    if (activeSubs > 0) {
+      return NextResponse.json({ success: false, error: `Cannot delete: ${activeSubs} user(s) have an active subscription on this plan.` }, { status: 409 })
+    }
+
+    // Clean up cancelled/expired subscriptions and their commissions
+    const subs = await prisma.subscription.findMany({ where: { planId: id }, select: { id: true } })
+    const subIds = subs.map((s) => s.id)
+    if (subIds.length > 0) {
+      await prisma.commission.deleteMany({ where: { subscriptionId: { in: subIds } } })
+      await prisma.subscription.deleteMany({ where: { id: { in: subIds } } })
+    }
+
     await prisma.plan.delete({ where: { id } })
     return NextResponse.json({ success: true, data: { deleted: true } })
-  } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : ''
-    if (msg.includes('Foreign key') || msg.includes('foreign key') || msg.includes('constraint')) {
-      return NextResponse.json({ success: false, error: 'Cannot delete: active subscriptions exist for this plan.' }, { status: 409 })
-    }
+  } catch (error) {
     return NextResponse.json({ success: false, error: 'Internal error' }, { status: 500 })
   }
 }
