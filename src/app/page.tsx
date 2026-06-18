@@ -12,23 +12,17 @@ import {
 
 /* ─── data ─── */
 const TICKER_FALLBACK = [
-  { pair: 'EUR/USD', dir: 'BUY',  change: '+0.42%', price: '1.08420' },
-  { pair: 'GBP/JPY', dir: 'SELL', change: '-0.81%', price: '196.340' },
   { pair: 'XAU/USD', dir: 'BUY',  change: '+1.23%', price: '2341.50' },
-  { pair: 'USD/JPY', dir: 'SELL', change: '-0.55%', price: '151.820' },
+  { pair: 'EUR/USD', dir: 'BUY',  change: '+0.42%', price: '1.08420' },
   { pair: 'GBP/USD', dir: 'BUY',  change: '+0.29%', price: '1.26540' },
-  { pair: 'AUD/USD', dir: 'SELL', change: '-0.38%', price: '0.65210' },
-  { pair: 'USD/CHF', dir: 'SELL', change: '-0.19%', price: '0.90120' },
-  { pair: 'NZD/USD', dir: 'BUY',  change: '+0.61%', price: '0.61340' },
-  { pair: 'USD/CAD', dir: 'BUY',  change: '+0.18%', price: '1.36450' },
-  { pair: 'EUR/GBP', dir: 'SELL', change: '-0.12%', price: '0.85620' },
+  { pair: 'USD/JPY', dir: 'SELL', change: '-0.55%', price: '151.820' },
 ]
 
 const SIGNALS = [
-  { pair: 'EUR/USD', dir: 'BUY',  entry: '1.08420', tp: '1.09100', sl: '1.08000', status: 'ACTIVE', pips: '+68',  time: '2m ago' },
-  { pair: 'GBP/JPY', dir: 'SELL', entry: '196.340', tp: '195.100', sl: '197.200', status: 'ACTIVE', pips: '+124', time: '8m ago' },
   { pair: 'XAU/USD', dir: 'BUY',  entry: '2341.50', tp: '2380.00', sl: '2315.00', status: 'WIN',    pips: '+385', time: '1h ago' },
-  { pair: 'GBP/USD', dir: 'SELL', entry: '1.26540', tp: '1.25800', sl: '1.27100', status: 'ACTIVE', pips: '+74',  time: '3h ago' },
+  { pair: 'EUR/USD', dir: 'BUY',  entry: '1.08420', tp: '1.09100', sl: '1.08000', status: 'ACTIVE', pips: '+68',  time: '2m ago' },
+  { pair: 'GBP/USD', dir: 'SELL', entry: '1.26540', tp: '1.25800', sl: '1.27100', status: 'ACTIVE', pips: '+74',  time: '15m ago' },
+  { pair: 'USD/JPY', dir: 'SELL', entry: '151.820', tp: '150.500', sl: '152.400', status: 'ACTIVE', pips: '+132', time: '3h ago' },
 ]
 
 const FEATURES = [

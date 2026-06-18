@@ -38,11 +38,7 @@ export type PriceData = {
   updatedAt: number
 }
 
-export const SUPPORTED_PAIRS = [
-  'EUR/USD', 'GBP/USD', 'USD/JPY', 'USD/CHF',
-  'AUD/USD', 'USD/CAD', 'NZD/USD', 'EUR/GBP',
-  'XAU/USD', 'GBP/JPY',
-]
+export const SUPPORTED_PAIRS = ['XAU/USD', 'EUR/USD', 'GBP/USD', 'USD/JPY']
 
 export function formatPrice(pair: string, price: string | number): string {
   const p = parseFloat(String(price))
