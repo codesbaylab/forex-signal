@@ -14,6 +14,11 @@ export default async function WalletPage() {
   if (!user) redirect('/auth/login')
 
   const wallets = await prisma.wallet.findMany({ where: { userId: user.id, currency: 'USDT_TRC20' } })
+  const recentDeposits = await prisma.deposit.findMany({
+    where: { userId: user.id },
+    orderBy: { createdAt: 'desc' },
+    take: 5,
+  })
   const recentTxs = await prisma.transaction.findMany({
     where: { userId: user.id },
     orderBy: { createdAt: 'desc' },
@@ -72,6 +77,38 @@ export default async function WalletPage() {
           </div>
         ))}
       </div>
+
+      {/* Deposit Requests */}
+      {recentDeposits.length > 0 && (
+        <div className="bg-white rounded-2xl border border-gray-100 p-5 mb-7">
+          <h2 className="font-bold text-gray-900 mb-4">Deposit Requests</h2>
+          <div className="space-y-3">
+            {recentDeposits.map((d) => {
+              const statusConfig: Record<string, { label: string; cls: string }> = {
+                WAITING:    { label: 'Pending Review', cls: 'bg-yellow-50 text-yellow-700' },
+                PENDING:    { label: 'Processing',    cls: 'bg-blue-50 text-blue-700' },
+                CONFIRMING: { label: 'Confirming',    cls: 'bg-blue-50 text-blue-700' },
+                CONFIRMED:  { label: 'Confirmed',     cls: 'bg-green-50 text-green-700' },
+                FINISHED:   { label: 'Completed',     cls: 'bg-green-50 text-green-700' },
+                FAILED:     { label: 'Rejected',      cls: 'bg-red-50 text-red-600' },
+                EXPIRED:    { label: 'Expired',       cls: 'bg-gray-100 text-gray-500' },
+              }
+              const s = statusConfig[d.status] ?? { label: d.status, cls: 'bg-gray-100 text-gray-500' }
+              return (
+                <div key={d.id} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">
+                      {Number(d.amount).toFixed(2)} USDT
+                    </p>
+                    <p className="text-xs text-gray-400">{new Date(d.createdAt).toLocaleDateString()}</p>
+                  </div>
+                  <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${s.cls}`}>{s.label}</span>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Recent Transactions */}
       <div className="bg-white rounded-2xl border border-gray-100 p-5">
