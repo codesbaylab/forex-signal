@@ -63,7 +63,7 @@ export default async function DashboardPage() {
   ]
 
   const pricesSetting = await prisma.setting.findUnique({ where: { key: 'forex_prices' } })
-  const liveprices: Record<string, { price: string; pct: string; dir: string }> =
+  const liveprices: Record<string, { price: string; pct: string; dir: string; updatedAt: number }> =
     pricesSetting?.value ? JSON.parse(pricesSetting.value) : {}
 
   return (
