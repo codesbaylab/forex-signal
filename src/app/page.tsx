@@ -1,6 +1,7 @@
 'use client'
 import { useRef, useState, useEffect } from 'react'
 import Link from 'next/link'
+import { createClient } from '@/lib/supabase/client'
 import {
   motion,
   useScroll,
@@ -110,6 +111,13 @@ function formatLandingPrice(pair: string, price: string): string {
 export default function LandingPage() {
   const [scrolled, setScrolled] = useState(false)
   const [ticker, setTicker] = useState(TICKER_FALLBACK)
+  const [loggedIn, setLoggedIn] = useState(false)
+
+  useEffect(() => {
+    createClient().auth.getUser().then(({ data }) => {
+      if (data.user) setLoggedIn(true)
+    })
+  }, [])
 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 30)
@@ -169,10 +177,18 @@ export default function LandingPage() {
             ))}
           </div>
           <div className="flex items-center gap-3">
-            <Link href="/auth/login" className="text-sm text-white/70 hover:text-white px-4 py-2 transition-colors font-medium">Login</Link>
-            <Link href="/auth/register" className="bg-gradient-to-r from-green-500 to-green-700 hover:from-green-400 hover:to-green-600 text-white font-bold px-5 py-2 rounded-xl text-sm shadow-lg shadow-green-900/40 transition-all duration-200 hover:scale-105">
-              Get Started Free
-            </Link>
+            {loggedIn ? (
+              <Link href="/dashboard" className="bg-gradient-to-r from-green-500 to-green-700 hover:from-green-400 hover:to-green-600 text-white font-bold px-5 py-2 rounded-xl text-sm shadow-lg shadow-green-900/40 transition-all duration-200 hover:scale-105">
+                Go to Dashboard →
+              </Link>
+            ) : (
+              <>
+                <Link href="/auth/login" className="text-sm text-white/70 hover:text-white px-4 py-2 transition-colors font-medium">Login</Link>
+                <Link href="/auth/register" className="bg-gradient-to-r from-green-500 to-green-700 hover:from-green-400 hover:to-green-600 text-white font-bold px-5 py-2 rounded-xl text-sm shadow-lg shadow-green-900/40 transition-all duration-200 hover:scale-105">
+                  Get Started Free
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </motion.nav>
