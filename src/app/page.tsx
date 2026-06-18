@@ -31,20 +31,20 @@ const FEATURES = [
   { icon: '🔐', title: 'USDT Wallet', desc: 'Built-in USDT (TRC20) wallet. Deposit, withdraw or transfer instantly.' },
   { icon: '📊', title: 'Technical AI', desc: 'RSI, MACD, EMA and Bollinger Bands analyzed 24/7 across all major pairs.' },
   { icon: '🌐', title: 'All Major Pairs', desc: 'Forex & gold — 10 instruments covered with real-time price feeds.' },
-  { icon: '🎁', title: 'Referral Income', desc: 'Earn multi-level commissions when your network subscribes. Up to 4 levels deep.' },
+  { icon: '🎁', title: 'Referral Income', desc: 'Earn multi-level commissions when your network subscribes.' },
   { icon: '📈', title: 'Signal History', desc: 'Full win/loss history with detailed analytics on every signal ever posted.' },
 ]
 
 const PLANS = [
   { name: 'Free', monthlyPrice: 0, features: ['Limited signals', 'Basic market access', 'Community access', 'Email support'], cta: 'Get Started', featured: false },
-  { name: 'Pro', monthlyPrice: 59, features: ['Unlimited signals', 'XAU/USD + major pairs', 'Real-time alerts', '4-level referral commissions', 'Full signal history', 'Priority support'], cta: 'Go Pro', featured: true },
+  { name: 'Pro', monthlyPrice: 59, features: ['Unlimited signals', 'XAU/USD + major pairs', 'Real-time alerts', 'Multi-level referral commissions', 'Full signal history', 'Priority support'], cta: 'Go Pro', featured: true },
 ]
 
 const STATS = [
   { value: '12,847+', label: 'Active Traders' },
   { value: '89%', label: 'Win Rate' },
   { value: '3,200+', label: 'Signals / Month' },
-  { value: '4 Levels', label: 'Referral Depth' },
+  { value: 'Multi-Level', label: 'Referral System' },
 ]
 
 /* ─── helpers ─── */
@@ -277,7 +277,7 @@ export default function LandingPage() {
             initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4, ease }}
           >
-            Professional BUY/SELL signals for forex, gold & crypto. Precision entry, TP and SL — delivered the moment an opportunity appears.
+            Professional BUY/SELL signals for forex & gold. Precision entry, TP and SL — delivered the moment an opportunity appears.
           </motion.p>
 
           <motion.div
@@ -324,7 +324,6 @@ export default function LandingPage() {
           {doubled.map((t, i) => (
             <div key={i} className="inline-flex items-center gap-3 mx-8">
               <span className="font-bold text-white text-sm">{t.pair}</span>
-              <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${t.dir === 'BUY' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>{t.dir}</span>
               <span className="text-white/60 text-sm font-mono">{t.price}</span>
               <span className={`text-xs font-semibold ${t.dir === 'BUY' ? 'text-green-400' : 'text-red-400'}`}>{t.change}</span>
               <span className="text-white/10 mx-2">|</span>
@@ -491,7 +490,7 @@ export default function LandingPage() {
               <div className="relative z-10">
                 <div className="text-5xl mb-5">🎁</div>
                 <h2 className="text-3xl md:text-4xl font-black text-white mb-3">Earn While You Sleep</h2>
-                <p className="text-white/55 text-lg mb-8 max-w-xl mx-auto">Share your referral link and earn commissions up to 4 levels deep — every time your network subscribes.</p>
+                <p className="text-white/55 text-lg mb-8 max-w-xl mx-auto">Share your referral link and earn multi-level commissions — every time your network subscribes.</p>
                 <Link href="/auth/register" className="inline-block bg-gradient-to-r from-green-500 to-green-700 hover:from-green-400 hover:to-green-600 text-white font-bold px-10 py-4 rounded-2xl transition-all duration-300 hover:scale-110 shadow-xl shadow-green-900/40">
                   Start Earning Now →
                 </Link>
