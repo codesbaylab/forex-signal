@@ -40,9 +40,13 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     const admin = await requireAdmin()
     if (!admin) return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 })
 
-    await prisma.plan.update({ where: { id }, data: { isActive: false } })
+    await prisma.plan.delete({ where: { id } })
     return NextResponse.json({ success: true, data: { deleted: true } })
-  } catch (error) {
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : ''
+    if (msg.includes('Foreign key') || msg.includes('foreign key') || msg.includes('constraint')) {
+      return NextResponse.json({ success: false, error: 'Cannot delete: active subscriptions exist for this plan.' }, { status: 409 })
+    }
     return NextResponse.json({ success: false, error: 'Internal error' }, { status: 500 })
   }
 }

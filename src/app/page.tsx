@@ -35,10 +35,7 @@ const FEATURES = [
   { icon: '📈', title: 'Signal History', desc: 'Full win/loss history with detailed analytics on every signal ever posted.' },
 ]
 
-const PLANS = [
-  { name: 'Free', monthlyPrice: 0, features: ['Limited signals', 'Basic market access', 'Community access', 'Email support'], cta: 'Get Started', featured: false },
-  { name: 'Pro', monthlyPrice: 59, features: ['Unlimited signals', 'XAU/USD + major pairs', 'Real-time alerts', 'Multi-level referral commissions', 'Full signal history', 'Priority support'], cta: 'Go Pro', featured: true },
-]
+type LivePlan = { id: string; name: string; price: number; features: string[] }
 
 const STATS = [
   { value: '12,847+', label: 'Active Traders' },
@@ -113,10 +110,21 @@ export default function LandingPage() {
   const [loggedIn, setLoggedIn] = useState(false)
   const [landingBilling, setLandingBilling] = useState<'monthly' | 'annual'>('monthly')
   const [discountPct, setDiscountPct] = useState(17)
+  const [plans, setPlans] = useState<LivePlan[]>([])
 
   useEffect(() => {
     fetch('/api/settings/public').then(r => r.json()).then(j => {
       if (j.annualDiscountPct) setDiscountPct(j.annualDiscountPct)
+    }).catch(() => {})
+    fetch('/api/plans').then(r => r.json()).then(j => {
+      if (j.success && Array.isArray(j.data)) {
+        setPlans(j.data.map((p: { id: string; name: string; price: number | string; features: unknown }) => ({
+          id: p.id,
+          name: p.name,
+          price: Number(p.price),
+          features: Array.isArray(p.features) ? p.features as string[] : [],
+        })))
+      }
     }).catch(() => {})
   }, [])
 
@@ -430,20 +438,22 @@ export default function LandingPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
-            {PLANS.map((plan, i) => {
+            {plans.map((plan, i) => {
               const isAnnual = landingBilling === 'annual'
               const discountMultiplier = 1 - discountPct / 100
-              const displayPrice = plan.monthlyPrice === 0 ? 0 : isAnnual ? Math.round(plan.monthlyPrice * discountMultiplier) : plan.monthlyPrice
-              const annualTotal = Math.round(plan.monthlyPrice * discountMultiplier) * 12
+              const isFree = plan.price === 0
+              const featured = !isFree
+              const displayPrice = isFree ? 0 : isAnnual ? Math.round(plan.price * discountMultiplier) : plan.price
+              const annualTotal = Math.round(plan.price * discountMultiplier) * 12
               return (
-                <ScrollReveal key={plan.name} delay={i * 0.12}>
-                  <TiltCard className={`relative rounded-2xl p-7 flex flex-col h-full ${plan.featured ? 'bg-gradient-to-b from-green-600/80 to-green-900/80 border border-green-400/40 shadow-2xl shadow-green-900/50' : 'bg-white/5 border border-white/10'}`}>
-                    {plan.featured && (
+                <ScrollReveal key={plan.id} delay={i * 0.12}>
+                  <TiltCard className={`relative rounded-2xl p-7 flex flex-col h-full ${featured ? 'bg-gradient-to-b from-green-600/80 to-green-900/80 border border-green-400/40 shadow-2xl shadow-green-900/50' : 'bg-white/5 border border-white/10'}`}>
+                    {featured && (
                       <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-green-400 to-emerald-400 text-green-900 text-xs font-black px-4 py-1 rounded-full shadow-lg whitespace-nowrap">MOST POPULAR</div>
                     )}
                     <div className="mb-6">
                       <h3 className="font-bold text-lg text-white mb-2">{plan.name}</h3>
-                      {plan.monthlyPrice === 0 ? (
+                      {isFree ? (
                         <div className="flex items-baseline gap-1">
                           <span className="text-5xl font-black text-white">Free</span>
                         </div>
@@ -455,14 +465,14 @@ export default function LandingPage() {
                           </div>
                           {isAnnual
                             ? <p className="text-white/40 text-xs mt-1">Billed as <span className="text-white/60 font-semibold">${annualTotal}/year</span></p>
-                            : <p className="text-white/40 text-xs mt-1">or <span className="text-green-400 font-semibold">${Math.round(plan.monthlyPrice * discountMultiplier)}/mo</span> billed annually</p>
+                            : <p className="text-white/40 text-xs mt-1">or <span className="text-green-400 font-semibold">${Math.round(plan.price * discountMultiplier)}/mo</span> billed annually</p>
                           }
                         </>
                       )}
                     </div>
                     <ul className="space-y-3 flex-1 mb-7">
-                      {plan.features.map((feat) => (
-                        <li key={feat} className="flex items-center gap-2.5 text-sm">
+                      {plan.features.map((feat, fi) => (
+                        <li key={fi} className="flex items-center gap-2.5 text-sm">
                           <svg className="w-4 h-4 flex-shrink-0 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
                           </svg>
@@ -470,8 +480,8 @@ export default function LandingPage() {
                         </li>
                       ))}
                     </ul>
-                    <Link href="/auth/register" className={`block text-center font-bold py-3.5 rounded-xl transition-all duration-200 hover:scale-105 ${plan.featured ? 'bg-white text-green-800 hover:bg-gray-100 shadow-lg' : 'bg-green-600/80 hover:bg-green-500 text-white'}`}>
-                      {plan.cta}
+                    <Link href="/auth/register" className={`block text-center font-bold py-3.5 rounded-xl transition-all duration-200 hover:scale-105 ${featured ? 'bg-white text-green-800 hover:bg-gray-100 shadow-lg' : 'bg-green-600/80 hover:bg-green-500 text-white'}`}>
+                      {isFree ? 'Get Started' : 'Go Pro'}
                     </Link>
                   </TiltCard>
                 </ScrollReveal>

@@ -16,7 +16,7 @@ export default function DeletePlanButton({ planId, planName }: { planId: string;
       const res = await fetch(`/api/admin/plans/${planId}`, { method: 'DELETE' })
       const json = await res.json()
       if (!json.success) throw new Error(json.error)
-      toast.success(`"${planName}" deactivated`)
+      toast.success(`"${planName}" deleted`)
       router.refresh()
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Failed to delete plan')
