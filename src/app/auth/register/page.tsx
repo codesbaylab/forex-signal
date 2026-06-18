@@ -17,6 +17,8 @@ function RegisterForm() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
+  const [agreed, setAgreed] = useState(false)
+
   const { register, handleSubmit, formState: { errors } } = useForm<RegisterInput>({
     resolver: zodResolver(RegisterSchema),
     defaultValues: { referralCode: ref },
@@ -76,7 +78,25 @@ function RegisterForm() {
               <Label htmlFor="referralCode">Referral code (optional)</Label>
               <Input id="referralCode" className="mt-1" {...register('referralCode')} />
             </div>
-            <Button type="submit" disabled={loading} className="w-full bg-brand-700 hover:bg-brand-800 text-white">
+            <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={agreed}
+                  onChange={(e) => setAgreed(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 rounded border-gray-300 text-brand-700 flex-shrink-0"
+                />
+                <span className="text-xs text-gray-600 leading-relaxed">
+                  I have read and agree to the{' '}
+                  <Link href="/terms" className="text-brand-600 font-semibold hover:underline">Terms of Service</Link>
+                  {' '}and{' '}
+                  <Link href="/privacy" className="text-brand-600 font-semibold hover:underline">Privacy Policy</Link>
+                  . I understand that forex and gold trading involves substantial risk of loss and SignalFX Pro signals are for informational purposes only, not financial advice.
+                </span>
+              </label>
+            </div>
+
+            <Button type="submit" disabled={loading || !agreed} className="w-full bg-brand-700 hover:bg-brand-800 text-white disabled:opacity-50 disabled:cursor-not-allowed">
               {loading ? 'Creating account…' : 'Create account'}
             </Button>
           </form>

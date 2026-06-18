@@ -34,6 +34,11 @@ export default function UserLayoutShell({ user, children }: Props) {
       <div className="lg:ml-60 flex flex-col min-h-screen">
         <Topbar user={user} onMenuClick={() => setOpen(true)} />
         <main className="flex-1 p-4 lg:p-7">{children}</main>
+        <footer className="px-4 lg:px-7 py-4 border-t border-gray-200">
+          <p className="text-xs text-gray-400 leading-relaxed">
+            <span className="font-semibold text-gray-500">Risk Disclaimer:</span> Trading forex and gold involves substantial risk of loss and is not suitable for all investors. Past performance of signals is not indicative of future results. SignalFX Pro provides signals for informational purposes only and does not constitute financial advice. Never trade with money you cannot afford to lose.
+          </p>
+        </footer>
       </div>
     </div>
   )

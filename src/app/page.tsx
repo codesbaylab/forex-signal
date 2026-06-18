@@ -458,16 +458,23 @@ export default function LandingPage() {
 
       {/* ── Footer ── */}
       <footer className="border-t border-white/10 py-10 px-6">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-green-400 to-green-700 flex items-center justify-center font-black text-white text-sm">S</div>
-            <span className="font-extrabold text-white">SignalFX Pro</span>
+        <div className="max-w-6xl mx-auto">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-green-400 to-green-700 flex items-center justify-center font-black text-white text-sm">S</div>
+              <span className="font-extrabold text-white">SignalFX Pro</span>
+            </div>
+            <p className="text-white/25 text-sm">© 2026 SignalFX Pro. All rights reserved.</p>
+            <div className="flex items-center gap-6 text-white/35 text-sm">
+              <Link href="/privacy" className="hover:text-white transition-colors">Privacy</Link>
+              <Link href="/terms" className="hover:text-white transition-colors">Terms</Link>
+              <Link href="/auth/login" className="hover:text-white transition-colors">Login</Link>
+            </div>
           </div>
-          <p className="text-white/25 text-sm">© 2025 SignalFX Pro. All rights reserved. Trading involves risk.</p>
-          <div className="flex items-center gap-6 text-white/35 text-sm">
-            <a href="#" className="hover:text-white transition-colors">Privacy</a>
-            <a href="#" className="hover:text-white transition-colors">Terms</a>
-            <Link href="/auth/login" className="hover:text-white transition-colors">Login</Link>
+          <div className="border-t border-white/5 pt-5">
+            <p className="text-white/20 text-xs text-center leading-relaxed max-w-3xl mx-auto">
+              <span className="font-semibold text-white/30">Risk Disclaimer:</span> Trading forex and gold involves substantial risk of loss and is not suitable for all investors. Past performance of signals is not indicative of future results. SignalFX Pro provides signals for informational purposes only and does not constitute financial advice. Never trade with money you cannot afford to lose. Please consult a licensed financial advisor before making any investment decisions.
+            </p>
           </div>
         </div>
       </footer>
