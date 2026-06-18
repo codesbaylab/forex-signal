@@ -147,7 +147,7 @@ export default function SettingsForm({ initialSettings: s }: Props) {
               onChange={(e) => setAnnualDiscount(e.target.value)}
               className="w-28"
             />
-            <span className="text-xs text-gray-400">% off when billed annually (shown as "Save X%")</span>
+            <span className="text-xs text-gray-400">% off when billed annually (shown as &ldquo;Save X%&rdquo;)</span>
           </div>
         </Section>
 
