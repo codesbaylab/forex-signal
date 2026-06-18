@@ -19,8 +19,6 @@ enum Role {
 
 enum Currency {
   USDT_TRC20
-  BTC
-  BNB_BEP20
 }
 
 enum TransactionType {

@@ -8,10 +8,8 @@ async function main() {
     { key: 'maintenance_mode', value: 'false' },
     { key: 'site_name', value: 'ForexSignal' },
     { key: 'min_withdrawal_usdt', value: '10' },
-    { key: 'min_withdrawal_btc', value: '0.0005' },
-    { key: 'min_withdrawal_bnb', value: '0.05' },
     { key: 'referral_levels_count', value: '4' },
-    { key: 'supported_cryptos', value: 'USDT_TRC20,BTC,BNB_BEP20' },
+    { key: 'supported_cryptos', value: 'USDT_TRC20' },
   ]
 
   for (const s of settings) {
