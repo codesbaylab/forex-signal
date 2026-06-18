@@ -15,19 +15,18 @@ type Plan = {
 interface Props {
   plans: Plan[]
   currentPlanId?: string
+  annualDiscountPct?: number
 }
 
-const ANNUAL_DISCOUNT = 0.17 // 17% off
-
-function annualMonthlyPrice(monthlyPrice: number) {
-  return Math.round(monthlyPrice * (1 - ANNUAL_DISCOUNT))
+function annualMonthlyPrice(monthlyPrice: number, discountPct: number) {
+  return Math.round(monthlyPrice * (1 - discountPct / 100))
 }
 
-function annualTotalPrice(monthlyPrice: number) {
-  return annualMonthlyPrice(monthlyPrice) * 12
+function annualTotalPrice(monthlyPrice: number, discountPct: number) {
+  return annualMonthlyPrice(monthlyPrice, discountPct) * 12
 }
 
-export default function SubscriptionPlansClient({ plans, currentPlanId }: Props) {
+export default function SubscriptionPlansClient({ plans, currentPlanId, annualDiscountPct = 17 }: Props) {
   const [billing, setBilling] = useState<'monthly' | 'annual'>('monthly')
   const [loading, setLoading] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -71,7 +70,7 @@ export default function SubscriptionPlansClient({ plans, currentPlanId }: Props)
               className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 ${billing === 'annual' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
             >
               Annually
-              <span className="bg-green-100 text-green-700 text-xs font-bold px-2 py-0.5 rounded-full">Save 17%</span>
+              <span className="bg-green-100 text-green-700 text-xs font-bold px-2 py-0.5 rounded-full">Save {annualDiscountPct}%</span>
             </button>
           </div>
         </div>
@@ -114,8 +113,8 @@ export default function SubscriptionPlansClient({ plans, currentPlanId }: Props)
         {paidPlans.map((plan) => {
           const isCurrent = currentPlanId === plan.id
           const monthlyPrice = plan.price
-          const displayPrice = billing === 'annual' ? annualMonthlyPrice(monthlyPrice) : monthlyPrice
-          const totalCharge = billing === 'annual' ? annualTotalPrice(monthlyPrice) : monthlyPrice
+          const displayPrice = billing === 'annual' ? annualMonthlyPrice(monthlyPrice, annualDiscountPct) : monthlyPrice
+          const totalCharge = billing === 'annual' ? annualTotalPrice(monthlyPrice, annualDiscountPct) : monthlyPrice
 
           return (
             <div key={plan.id} className={`bg-white rounded-2xl border p-6 flex flex-col relative ${isCurrent ? 'border-brand-700 ring-2 ring-brand-700' : 'border-gray-100'}`}>

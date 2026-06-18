@@ -44,6 +44,9 @@ export default function SettingsForm({ initialSettings: s }: Props) {
   const [npIpnSecret, setNpIpnSecret] = useState(s['payment_nowpayments_ipn_secret'] ?? '')
   const [npSandbox, setNpSandbox] = useState(s['payment_nowpayments_sandbox'] === 'true')
 
+  // Billing
+  const [annualDiscount, setAnnualDiscount] = useState(s['annual_discount_pct'] ?? '17')
+
   // Manual deposit
   const [manualEnabled, setManualEnabled] = useState(s['payment_manual_enabled'] === 'true')
   const [manualAddress, setManualAddress] = useState(s['payment_manual_usdt_address'] ?? '')
@@ -83,6 +86,7 @@ export default function SettingsForm({ initialSettings: s }: Props) {
       site_name: siteName,
       maintenance_mode: String(maintenance),
       min_withdrawal_usdt: minUSDT,
+      annual_discount_pct: annualDiscount,
       payment_nowpayments_enabled: String(npEnabled),
       payment_nowpayments_api_key: npApiKey,
       payment_nowpayments_ipn_secret: npIpnSecret,
@@ -127,6 +131,23 @@ export default function SettingsForm({ initialSettings: s }: Props) {
           <div className="flex items-center gap-3">
             <Label className="w-32 text-xs text-gray-500">Min USDT (TRC20)</Label>
             <Input type="number" min="0" step="0.01" value={minUSDT} onChange={(e) => setMinUSDT(e.target.value)} className="flex-1" />
+          </div>
+        </Section>
+
+        {/* Billing */}
+        <Section title="Billing" subtitle="Subscription pricing configuration">
+          <div className="flex items-center gap-3">
+            <Label className="w-32 text-xs text-gray-500">Annual Discount %</Label>
+            <Input
+              type="number"
+              min="0"
+              max="80"
+              step="1"
+              value={annualDiscount}
+              onChange={(e) => setAnnualDiscount(e.target.value)}
+              className="w-28"
+            />
+            <span className="text-xs text-gray-400">% off when billed annually (shown as "Save X%")</span>
           </div>
         </Section>
 

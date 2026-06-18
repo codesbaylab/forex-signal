@@ -22,6 +22,9 @@ export default async function SubscriptionPage() {
     orderBy: { sortOrder: 'asc' },
   })
 
+  const discountSetting = await prisma.setting.findUnique({ where: { key: 'annual_discount_pct' } })
+  const annualDiscountPct = Number(discountSetting?.value ?? 17)
+
   const serialized = plans.map((p) => ({
     id: p.id,
     name: p.name,
@@ -49,7 +52,7 @@ export default async function SubscriptionPage() {
         </div>
       )}
 
-      <SubscriptionPlansClient plans={serialized} currentPlanId={activeSub?.planId} />
+      <SubscriptionPlansClient plans={serialized} currentPlanId={activeSub?.planId} annualDiscountPct={annualDiscountPct} />
     </div>
   )
 }

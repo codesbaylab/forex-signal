@@ -112,6 +112,13 @@ export default function LandingPage() {
   const [ticker, setTicker] = useState(TICKER_FALLBACK)
   const [loggedIn, setLoggedIn] = useState(false)
   const [landingBilling, setLandingBilling] = useState<'monthly' | 'annual'>('monthly')
+  const [discountPct, setDiscountPct] = useState(17)
+
+  useEffect(() => {
+    fetch('/api/settings/public').then(r => r.json()).then(j => {
+      if (j.annualDiscountPct) setDiscountPct(j.annualDiscountPct)
+    }).catch(() => {})
+  }, [])
 
   useEffect(() => {
     createClient().auth.getUser().then(({ data }) => {
@@ -418,7 +425,7 @@ export default function LandingPage() {
                 className={`px-6 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 ${landingBilling === 'annual' ? 'bg-white text-gray-900 shadow' : 'text-white/60 hover:text-white'}`}
               >
                 Annually
-                <span className="bg-green-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">Save 17%</span>
+                <span className="bg-green-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">Save {discountPct}%</span>
               </button>
             </div>
           </div>
@@ -426,8 +433,9 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
             {PLANS.map((plan, i) => {
               const isAnnual = landingBilling === 'annual'
-              const displayPrice = plan.monthlyPrice === 0 ? 0 : isAnnual ? Math.round(plan.monthlyPrice * 0.83) : plan.monthlyPrice
-              const annualTotal = Math.round(plan.monthlyPrice * 0.83) * 12
+              const discountMultiplier = 1 - discountPct / 100
+              const displayPrice = plan.monthlyPrice === 0 ? 0 : isAnnual ? Math.round(plan.monthlyPrice * discountMultiplier) : plan.monthlyPrice
+              const annualTotal = Math.round(plan.monthlyPrice * discountMultiplier) * 12
               return (
                 <ScrollReveal key={plan.name} delay={i * 0.12}>
                   <TiltCard className={`relative rounded-2xl p-7 flex flex-col h-full ${plan.featured ? 'bg-gradient-to-b from-green-600/80 to-green-900/80 border border-green-400/40 shadow-2xl shadow-green-900/50' : 'bg-white/5 border border-white/10'}`}>
@@ -448,7 +456,7 @@ export default function LandingPage() {
                           </div>
                           {isAnnual
                             ? <p className="text-white/40 text-xs mt-1">Billed as <span className="text-white/60 font-semibold">${annualTotal}/year</span></p>
-                            : <p className="text-white/40 text-xs mt-1">or <span className="text-green-400 font-semibold">${Math.round(plan.monthlyPrice * 0.83)}/mo</span> billed annually</p>
+                            : <p className="text-white/40 text-xs mt-1">or <span className="text-green-400 font-semibold">${Math.round(plan.monthlyPrice * discountMultiplier)}/mo</span> billed annually</p>
                           }
                         </>
                       )}

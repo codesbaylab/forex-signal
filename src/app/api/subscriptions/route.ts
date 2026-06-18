@@ -19,8 +19,10 @@ export async function POST(request: NextRequest) {
     const paidCurrency = (currency ?? plan.currency) as Currency
     const monthlyPrice = Number(plan.price)
     const isAnnual = billingPeriod === 'annual'
+    const discountSetting = await prisma.setting.findUnique({ where: { key: 'annual_discount_pct' } })
+    const discountPct = Number(discountSetting?.value ?? 17) / 100
     const paidAmount = isAnnual
-      ? Math.round(monthlyPrice * 12 * (1 - 0.17) / 12) * 12
+      ? Math.round(monthlyPrice * (1 - discountPct)) * 12
       : monthlyPrice
     const durationDays = isAnnual ? 365 : plan.durationDays
 
