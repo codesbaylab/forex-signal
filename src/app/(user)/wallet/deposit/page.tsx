@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { DepositSchema, type DepositInput } from '@/lib/validations/wallet'
 import { Copy, Check } from 'lucide-react'
+import { QRCodeSVG } from 'qrcode.react'
 
 type Step = 'form' | 'nowpayments' | 'manual' | 'submitted'
 
@@ -156,6 +157,18 @@ export default function DepositPage() {
             <p className="text-sm text-gray-500 mt-1">{manualData.note}</p>
           </div>
           <div className="space-y-3 mb-5">
+            {/* QR Code */}
+            <div className="flex flex-col items-center bg-white border-2 border-dashed border-brand-200 rounded-xl p-5">
+              <QRCodeSVG
+                value={manualData.address}
+                size={180}
+                level="M"
+                includeMargin={false}
+                className="rounded-lg"
+              />
+              <p className="text-xs text-gray-400 mt-3">Scan with your wallet app</p>
+            </div>
+
             <div className="bg-gray-50 rounded-xl p-4">
               <p className="text-xs text-gray-400 mb-1">Send to Address (TRC20)</p>
               <div className="flex items-center gap-2">
