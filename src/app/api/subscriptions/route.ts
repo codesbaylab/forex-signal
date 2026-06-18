@@ -11,13 +11,18 @@ export async function POST(request: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
 
-    const { planId, currency } = await request.json()
+    const { planId, currency, billingPeriod } = await request.json()
 
     const plan = await prisma.plan.findUnique({ where: { id: planId } })
     if (!plan || !plan.isActive) return NextResponse.json({ success: false, error: 'Plan not found or inactive' }, { status: 404 })
 
     const paidCurrency = (currency ?? plan.currency) as Currency
-    const paidAmount = Number(plan.price)
+    const monthlyPrice = Number(plan.price)
+    const isAnnual = billingPeriod === 'annual'
+    const paidAmount = isAnnual
+      ? Math.round(monthlyPrice * 12 * (1 - 0.17) / 12) * 12
+      : monthlyPrice
+    const durationDays = isAnnual ? 365 : plan.durationDays
 
     // Cancel existing active subscription
     await prisma.subscription.updateMany({
@@ -37,7 +42,7 @@ export async function POST(request: NextRequest) {
     }
 
     const now = new Date()
-    const expiresAt = new Date(now.getTime() + plan.durationDays * 24 * 60 * 60 * 1000)
+    const expiresAt = new Date(now.getTime() + durationDays * 24 * 60 * 60 * 1000)
 
     const subscription = await prisma.subscription.create({
       data: {

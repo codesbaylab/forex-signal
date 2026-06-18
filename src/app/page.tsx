@@ -36,9 +36,8 @@ const FEATURES = [
 ]
 
 const PLANS = [
-  { name: 'Free', price: 0, period: 'forever', features: ['5 signals/day', 'Basic pairs only', 'Community access', 'Email support'], cta: 'Get Started', featured: false },
-  { name: 'Basic', price: 29, period: 'month', features: ['50 signals/day', 'All major pairs', 'Real-time alerts', '2-level referral', 'Priority support'], cta: 'Start Basic', featured: false },
-  { name: 'Pro', price: 59, period: 'month', features: ['Unlimited signals', 'All pairs + crypto', 'Instant push alerts', '4-level referral', 'Analytics dashboard', 'API access'], cta: 'Go Pro', featured: true },
+  { name: 'Free', monthlyPrice: 0, features: ['Limited signals', 'Basic market access', 'Community access', 'Email support'], cta: 'Get Started', featured: false },
+  { name: 'Pro', monthlyPrice: 59, features: ['Unlimited signals', 'XAU/USD + major pairs', 'Real-time alerts', '4-level referral commissions', 'Full signal history', 'Priority support'], cta: 'Go Pro', featured: true },
 ]
 
 const STATS = [
@@ -112,6 +111,7 @@ export default function LandingPage() {
   const [scrolled, setScrolled] = useState(false)
   const [ticker, setTicker] = useState(TICKER_FALLBACK)
   const [loggedIn, setLoggedIn] = useState(false)
+  const [landingBilling, setLandingBilling] = useState<'monthly' | 'annual'>('monthly')
 
   useEffect(() => {
     createClient().auth.getUser().then(({ data }) => {
@@ -397,42 +397,79 @@ export default function LandingPage() {
 
       {/* ── Pricing ── */}
       <section id="pricing" className="py-24 px-6">
-        <div className="max-w-5xl mx-auto">
-          <ScrollReveal className="text-center mb-14">
+        <div className="max-w-4xl mx-auto">
+          <ScrollReveal className="text-center mb-10">
             <div className="inline-block bg-green-500/10 border border-green-500/20 text-green-400 text-xs font-bold px-3 py-1 rounded-full mb-4">PRICING</div>
             <h2 className="text-4xl md:text-5xl font-black text-white mb-3">Simple, transparent pricing</h2>
-            <p className="text-white/45 text-lg">Pay with crypto. Cancel anytime.</p>
+            <p className="text-white/45 text-lg">Pay with USDT. Cancel anytime.</p>
           </ScrollReveal>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {PLANS.map((plan, i) => (
-              <ScrollReveal key={plan.name} delay={i * 0.12}>
-                <TiltCard className={`relative rounded-2xl p-7 flex flex-col h-full ${plan.featured ? 'bg-gradient-to-b from-green-600/80 to-green-900/80 border border-green-400/40 shadow-2xl shadow-green-900/50' : 'bg-white/5 border border-white/10'}`}>
-                  {plan.featured && (
-                    <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-green-400 to-emerald-400 text-green-900 text-xs font-black px-4 py-1 rounded-full shadow-lg whitespace-nowrap">MOST POPULAR</div>
-                  )}
-                  <div className="mb-6">
-                    <h3 className="font-bold text-lg text-white mb-2">{plan.name}</h3>
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-5xl font-black text-white">${plan.price}</span>
-                      <span className="text-white/40 text-sm">/{plan.period}</span>
+
+          {/* Billing toggle */}
+          <div className="flex justify-center mb-10">
+            <div className="inline-flex items-center bg-white/10 rounded-xl p-1 gap-1">
+              <button
+                onClick={() => setLandingBilling('monthly')}
+                className={`px-6 py-2 rounded-lg text-sm font-semibold transition-all ${landingBilling === 'monthly' ? 'bg-white text-gray-900 shadow' : 'text-white/60 hover:text-white'}`}
+              >
+                Monthly
+              </button>
+              <button
+                onClick={() => setLandingBilling('annual')}
+                className={`px-6 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 ${landingBilling === 'annual' ? 'bg-white text-gray-900 shadow' : 'text-white/60 hover:text-white'}`}
+              >
+                Annually
+                <span className="bg-green-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">Save 17%</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+            {PLANS.map((plan, i) => {
+              const isAnnual = landingBilling === 'annual'
+              const displayPrice = plan.monthlyPrice === 0 ? 0 : isAnnual ? Math.round(plan.monthlyPrice * 0.83) : plan.monthlyPrice
+              const annualTotal = Math.round(plan.monthlyPrice * 0.83) * 12
+              return (
+                <ScrollReveal key={plan.name} delay={i * 0.12}>
+                  <TiltCard className={`relative rounded-2xl p-7 flex flex-col h-full ${plan.featured ? 'bg-gradient-to-b from-green-600/80 to-green-900/80 border border-green-400/40 shadow-2xl shadow-green-900/50' : 'bg-white/5 border border-white/10'}`}>
+                    {plan.featured && (
+                      <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-green-400 to-emerald-400 text-green-900 text-xs font-black px-4 py-1 rounded-full shadow-lg whitespace-nowrap">MOST POPULAR</div>
+                    )}
+                    <div className="mb-6">
+                      <h3 className="font-bold text-lg text-white mb-2">{plan.name}</h3>
+                      {plan.monthlyPrice === 0 ? (
+                        <div className="flex items-baseline gap-1">
+                          <span className="text-5xl font-black text-white">Free</span>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="flex items-baseline gap-1">
+                            <span className="text-5xl font-black text-white">${displayPrice}</span>
+                            <span className="text-white/40 text-sm">/month</span>
+                          </div>
+                          {isAnnual
+                            ? <p className="text-white/40 text-xs mt-1">Billed as <span className="text-white/60 font-semibold">${annualTotal}/year</span></p>
+                            : <p className="text-white/40 text-xs mt-1">or <span className="text-green-400 font-semibold">${Math.round(plan.monthlyPrice * 0.83)}/mo</span> billed annually</p>
+                          }
+                        </>
+                      )}
                     </div>
-                  </div>
-                  <ul className="space-y-3 flex-1 mb-7">
-                    {plan.features.map((feat) => (
-                      <li key={feat} className="flex items-center gap-2.5 text-sm">
-                        <svg className="w-4 h-4 flex-shrink-0 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                        </svg>
-                        <span className="text-white/75">{feat}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <Link href="/auth/register" className={`block text-center font-bold py-3.5 rounded-xl transition-all duration-200 hover:scale-105 ${plan.featured ? 'bg-white text-green-800 hover:bg-gray-100 shadow-lg' : 'bg-green-600/80 hover:bg-green-500 text-white'}`}>
-                    {plan.cta}
-                  </Link>
-                </TiltCard>
-              </ScrollReveal>
-            ))}
+                    <ul className="space-y-3 flex-1 mb-7">
+                      {plan.features.map((feat) => (
+                        <li key={feat} className="flex items-center gap-2.5 text-sm">
+                          <svg className="w-4 h-4 flex-shrink-0 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                          </svg>
+                          <span className="text-white/75">{feat}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <Link href="/auth/register" className={`block text-center font-bold py-3.5 rounded-xl transition-all duration-200 hover:scale-105 ${plan.featured ? 'bg-white text-green-800 hover:bg-gray-100 shadow-lg' : 'bg-green-600/80 hover:bg-green-500 text-white'}`}>
+                      {plan.cta}
+                    </Link>
+                  </TiltCard>
+                </ScrollReveal>
+              )
+            })}
           </div>
         </div>
       </section>
