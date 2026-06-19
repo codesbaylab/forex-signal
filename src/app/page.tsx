@@ -19,12 +19,6 @@ const TICKER_FALLBACK = [
   { pair: 'USD/JPY', dir: 'SELL', change: '-0.55%', price: '151.820' },
 ]
 
-const SIGNALS = [
-  { pair: 'XAU/USD', dir: 'BUY',  entry: '2341.50', tp: '2380.00', sl: '2315.00', status: 'WIN',    pips: '+385', time: '1h ago' },
-  { pair: 'EUR/USD', dir: 'BUY',  entry: '1.08420', tp: '1.09100', sl: '1.08000', status: 'ACTIVE', pips: '+68',  time: '2m ago' },
-  { pair: 'GBP/USD', dir: 'SELL', entry: '1.26540', tp: '1.25800', sl: '1.27100', status: 'ACTIVE', pips: '+74',  time: '15m ago' },
-  { pair: 'USD/JPY', dir: 'SELL', entry: '151.820', tp: '150.500', sl: '152.400', status: 'ACTIVE', pips: '+132', time: '3h ago' },
-]
 
 const FREE_FEATURES = [
   { icon: '📡', title: 'Live Price Feed', desc: 'XAU/USD, EUR/USD, GBP/USD & USD/JPY updated every 5 minutes.' },
@@ -190,7 +184,7 @@ export default function LandingPage() {
             <span className="font-extrabold text-white text-lg tracking-tight">SignalFX Pro</span>
           </div>
           <div className="hidden md:flex items-center gap-8 text-sm text-white/60 font-medium">
-            {['Features', 'Signals', 'Pricing'].map((item) => (
+            {['Features', 'Pricing'].map((item) => (
               <a key={item} href={`#${item.toLowerCase()}`} className="hover:text-white transition-colors">{item}</a>
             ))}
           </div>
@@ -355,41 +349,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── Signal Preview ── */}
-      <section id="signals" className="py-20 px-6">
-        <div className="max-w-6xl mx-auto">
-          <ScrollReveal className="text-center mb-14">
-            <div className="inline-block bg-green-500/10 border border-green-500/20 text-green-400 text-xs font-bold px-3 py-1 rounded-full mb-4">LIVE SIGNALS</div>
-            <h2 className="text-4xl md:text-5xl font-black text-white mb-3">See What You Get</h2>
-            <p className="text-white/45 text-lg">Real signals — entry, TP, SL, and win tracking in one card</p>
-          </ScrollReveal>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {SIGNALS.map((s, i) => (
-              <ScrollReveal key={i} delay={i * 0.1}>
-                <TiltCard className={`relative bg-white/5 border ${s.status === 'WIN' ? 'border-green-500/50' : s.dir === 'BUY' ? 'border-green-500/20' : 'border-red-500/20'} rounded-2xl p-5 cursor-default h-full`}>
-                  {s.status === 'WIN' && (
-                    <div className="absolute -top-2.5 -right-2.5 bg-gradient-to-r from-green-500 to-emerald-400 text-green-900 text-[10px] font-black px-2.5 py-0.5 rounded-full shadow-lg">WIN ✓</div>
-                  )}
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="font-black text-white text-lg">{s.pair}</span>
-                    <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${s.dir === 'BUY' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>{s.dir}</span>
-                  </div>
-                  <div className="text-2xl font-black text-white mb-3">{s.entry}</div>
-                  <div className="space-y-1.5 text-xs text-white/40 mb-3">
-                    <div className="flex justify-between"><span>Take Profit</span><span className="text-green-400 font-semibold">{s.tp}</span></div>
-                    <div className="flex justify-between"><span>Stop Loss</span><span className="text-red-400 font-semibold">{s.sl}</span></div>
-                  </div>
-                  <div className="flex items-center justify-between pt-2.5 border-t border-white/10">
-                    <span className="text-green-400 font-bold text-sm">{s.pips} pips</span>
-                    <span className="text-white/25 text-xs">{s.time}</span>
-                  </div>
-                </TiltCard>
-              </ScrollReveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* ── Features ── */}
       <section id="features" className="py-20 px-6 border-y border-white/5 bg-white/[0.015]">
         <div className="max-w-6xl mx-auto">
@@ -475,51 +434,69 @@ export default function LandingPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+          <div className={`grid grid-cols-1 md:grid-cols-${1 + plans.length} gap-6 max-w-${plans.length > 1 ? '5xl' : '3xl'} mx-auto`}>
+            {/* Static Free card — always shown */}
+            <ScrollReveal delay={0}>
+              <TiltCard className="rounded-2xl p-7 flex flex-col h-full bg-white/5 border border-white/10">
+                <div className="mb-6">
+                  <p className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-3">Free</p>
+                  <div className="flex items-baseline gap-1 mb-1">
+                    <span className="text-5xl font-black text-white">$0</span>
+                    <span className="text-white/40 text-sm">/forever</span>
+                  </div>
+                  <p className="text-white/30 text-xs">No credit card required</p>
+                </div>
+                <ul className="space-y-3 flex-1 mb-7">
+                  {['Live price feed (4 pairs)', 'USDT TRC20 wallet', 'Closed signal history', 'Community access'].map((f) => (
+                    <li key={f} className="flex items-center gap-2.5 text-sm">
+                      <svg className="w-4 h-4 flex-shrink-0 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
+                      <span className="text-white/55">{f}</span>
+                    </li>
+                  ))}
+                  {['Live active signals', 'Referral commissions'].map((f) => (
+                    <li key={f} className="flex items-center gap-2.5 text-sm">
+                      <svg className="w-4 h-4 flex-shrink-0 text-white/15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                      <span className="text-white/25 line-through">{f}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link href="/auth/register" className="block text-center font-bold py-3.5 rounded-xl transition-all duration-200 hover:scale-105 bg-white/10 hover:bg-white/20 text-white/70">
+                  Start Free
+                </Link>
+              </TiltCard>
+            </ScrollReveal>
+
+            {/* Paid plans from DB */}
             {plans.map((plan, i) => {
               const isAnnual = landingBilling === 'annual'
               const discountMultiplier = 1 - discountPct / 100
-              const isFree = plan.price === 0
-              const featured = !isFree
-              const displayPrice = isFree ? 0 : isAnnual ? Math.round(plan.price * discountMultiplier) : plan.price
+              const displayPrice = isAnnual ? Math.round(plan.price * discountMultiplier) : plan.price
               const annualTotal = Math.round(plan.price * discountMultiplier) * 12
               return (
-                <ScrollReveal key={plan.id} delay={i * 0.12}>
-                  <TiltCard className={`relative rounded-2xl p-7 flex flex-col h-full ${featured ? 'bg-gradient-to-b from-green-600/80 to-green-900/80 border border-green-400/40 shadow-2xl shadow-green-900/50' : 'bg-white/5 border border-white/10'}`}>
-                    {featured && (
-                      <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-green-400 to-emerald-400 text-green-900 text-xs font-black px-4 py-1 rounded-full shadow-lg whitespace-nowrap">MOST POPULAR</div>
-                    )}
+                <ScrollReveal key={plan.id} delay={(i + 1) * 0.12}>
+                  <TiltCard className="relative rounded-2xl p-7 flex flex-col h-full bg-gradient-to-b from-green-600/80 to-green-900/80 border border-green-400/40 shadow-2xl shadow-green-900/50">
+                    <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-green-400 to-emerald-400 text-green-900 text-xs font-black px-4 py-1 rounded-full shadow-lg whitespace-nowrap">MOST POPULAR</div>
                     <div className="mb-6">
-                      <h3 className="font-bold text-lg text-white mb-2">{plan.name}</h3>
-                      {isFree ? (
-                        <div className="flex items-baseline gap-1">
-                          <span className="text-5xl font-black text-white">Free</span>
-                        </div>
-                      ) : (
-                        <>
-                          <div className="flex items-baseline gap-1">
-                            <span className="text-5xl font-black text-white">${displayPrice}</span>
-                            <span className="text-white/40 text-sm">/month</span>
-                          </div>
-                          {isAnnual
-                            ? <p className="text-white/40 text-xs mt-1">Billed as <span className="text-white/60 font-semibold">${annualTotal}/year</span></p>
-                            : <p className="text-white/40 text-xs mt-1">or <span className="text-green-400 font-semibold">${Math.round(plan.price * discountMultiplier)}/mo</span> billed annually</p>
-                          }
-                        </>
-                      )}
+                      <p className="text-xs font-semibold text-green-300/70 uppercase tracking-widest mb-3">{plan.name}</p>
+                      <div className="flex items-baseline gap-1 mb-1">
+                        <span className="text-5xl font-black text-white">${displayPrice}</span>
+                        <span className="text-white/40 text-sm">/month</span>
+                      </div>
+                      {isAnnual
+                        ? <p className="text-white/40 text-xs mt-1">Billed as <span className="text-white/70 font-semibold">${annualTotal}/year</span></p>
+                        : <p className="text-white/40 text-xs mt-1">or <span className="text-green-300 font-semibold">${Math.round(plan.price * discountMultiplier)}/mo</span> billed annually</p>
+                      }
                     </div>
                     <ul className="space-y-3 flex-1 mb-7">
                       {plan.features.map((feat, fi) => (
                         <li key={fi} className="flex items-center gap-2.5 text-sm">
-                          <svg className="w-4 h-4 flex-shrink-0 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                          </svg>
-                          <span className="text-white/75">{feat}</span>
+                          <svg className="w-4 h-4 flex-shrink-0 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
+                          <span className="text-white/85">{feat}</span>
                         </li>
                       ))}
                     </ul>
-                    <Link href="/auth/register" className={`block text-center font-bold py-3.5 rounded-xl transition-all duration-200 hover:scale-105 ${featured ? 'bg-white text-green-800 hover:bg-gray-100 shadow-lg' : 'bg-green-600/80 hover:bg-green-500 text-white'}`}>
-                      {isFree ? 'Get Started' : 'Go Pro'}
+                    <Link href="/auth/register" className="block text-center font-bold py-3.5 rounded-xl transition-all duration-200 hover:scale-105 bg-white text-green-800 hover:bg-gray-100 shadow-lg">
+                      Get {plan.name}
                     </Link>
                   </TiltCard>
                 </ScrollReveal>
