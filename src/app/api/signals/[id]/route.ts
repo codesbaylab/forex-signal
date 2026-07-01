@@ -19,15 +19,22 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   }
 }
 
+async function isAuthorized(request: NextRequest): Promise<boolean> {
+  const apiKey = request.headers.get('x-api-key')
+  const validKey = process.env.SIGNAL_PUBLISH_KEY
+  if (validKey && apiKey === validKey) return true
+
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return false
+  const profile = await prisma.profile.findUnique({ where: { id: user.id } })
+  return !!(profile && profile.role === 'ADMIN')
+}
+
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
-
-    const profile = await prisma.profile.findUnique({ where: { id: user.id } })
-    if (!profile || profile.role !== 'ADMIN') return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 })
+    if (!await isAuthorized(request)) return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 })
 
     const body = await request.json()
     const parsed = UpdateSignalSchema.safeParse(body)
@@ -42,6 +49,9 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       updateData.status = publishNow ? 'ACTIVE' : updateData.status ?? 'DRAFT'
       if (publishNow) updateData.publishedAt = new Date()
     }
+    if (updateData.status && ['TP_HIT', 'SL_HIT', 'CLOSED'].includes(updateData.status as string)) {
+      updateData.closedAt = new Date()
+    }
 
     const signal = await prisma.signal.update({ where: { id }, data: updateData })
     return NextResponse.json({ success: true, data: signal })
@@ -53,15 +63,18 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
+    if (!await isAuthorized(request)) return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 })
 
-    const profile = await prisma.profile.findUnique({ where: { id: user.id } })
-    if (!profile || profile.role !== 'ADMIN') return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 })
+    const { searchParams } = new URL(request.url)
+    const hard = searchParams.get('hard') === 'true'
 
-    await prisma.signal.update({ where: { id }, data: { status: 'CLOSED' } })
-    return NextResponse.json({ success: true, data: { deleted: true } })
+    if (hard) {
+      await prisma.signal.delete({ where: { id } })
+    } else {
+      await prisma.signal.update({ where: { id }, data: { status: 'CLOSED' } })
+    }
+
+    return NextResponse.json({ success: true, data: { deleted: true, hard } })
   } catch (error) {
     return NextResponse.json({ success: false, error: 'Internal error' }, { status: 500 })
   }

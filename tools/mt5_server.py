@@ -152,6 +152,42 @@ async def handle_list_tools() -> list[types.Tool]:
             }
         ),
         types.Tool(
+            name="update_signal",
+            description="Update the result and status of a published signal (e.g. mark as WIN/TP_HIT or LOSS/SL_HIT after the trade closes).",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "signal_id": {"type": "string", "description": "Signal ID returned when the signal was published"},
+                    "status": {
+                        "type": "string",
+                        "enum": ["ACTIVE", "TP_HIT", "SL_HIT", "CLOSED"],
+                        "description": "New signal status"
+                    },
+                    "result": {
+                        "type": "string",
+                        "enum": ["WIN", "LOSS", "BREAKEVEN"],
+                        "description": "Trade result"
+                    },
+                    "pips_gained": {
+                        "type": "number",
+                        "description": "Pips gained (positive for win, negative for loss)"
+                    },
+                },
+                "required": ["signal_id", "status"]
+            }
+        ),
+        types.Tool(
+            name="delete_signal",
+            description="Permanently delete a signal from the platform by its ID.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "signal_id": {"type": "string", "description": "Signal ID to delete"},
+                },
+                "required": ["signal_id"]
+            }
+        ),
+        types.Tool(
             name="publish_signal",
             description="Publish a LIMIT ORDER signal to the platform. Always call check_news first. Entry is the limit price (swept session level). Subscribers set this as a pending order — it fills only if price returns to that level within valid_hours.",
             inputSchema={
@@ -525,6 +561,58 @@ async def handle_call_tool(name: str, arguments: dict) -> list[types.TextContent
                 }))]
         finally:
             mt5.shutdown()
+
+    elif name == "update_signal":
+        signal_id  = arguments["signal_id"]
+        status     = arguments["status"]
+        result     = arguments.get("result")
+        pips       = arguments.get("pips_gained")
+
+        payload = {"status": status}
+        if result:
+            payload["result"] = result
+        if pips is not None:
+            payload["pipsGained"] = pips
+
+        try:
+            resp = requests.put(
+                f"{API_URL}/api/signals/{signal_id}",
+                json=payload,
+                headers={"x-api-key": API_KEY, "Content-Type": "application/json"},
+                timeout=10,
+            )
+            data = resp.json()
+            if data.get("success"):
+                return [types.TextContent(type="text", text=json.dumps({
+                    "status": "updated",
+                    "signal_id": signal_id,
+                    "new_status": status,
+                    "result": result,
+                    "pips_gained": pips,
+                }))]
+            else:
+                return [types.TextContent(type="text", text=f"Update failed: {data.get('error')}")]
+        except Exception as e:
+            return [types.TextContent(type="text", text=f"Request error: {e}")]
+
+    elif name == "delete_signal":
+        signal_id = arguments["signal_id"]
+        try:
+            resp = requests.delete(
+                f"{API_URL}/api/signals/{signal_id}?hard=true",
+                headers={"x-api-key": API_KEY},
+                timeout=10,
+            )
+            data = resp.json()
+            if data.get("success"):
+                return [types.TextContent(type="text", text=json.dumps({
+                    "status": "deleted",
+                    "signal_id": signal_id,
+                }))]
+            else:
+                return [types.TextContent(type="text", text=f"Delete failed: {data.get('error')}")]
+        except Exception as e:
+            return [types.TextContent(type="text", text=f"Request error: {e}")]
 
     elif name == "publish_signal":
         direction   = arguments["direction"]
