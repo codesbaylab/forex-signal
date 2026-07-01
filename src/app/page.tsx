@@ -148,7 +148,6 @@ export default function LandingPage() {
   const heroRotateX = useTransform(scrollYProgress, [0, 0.6], [0, 8])
   const doubled = [...ticker, ...ticker]
 
-  const proPlans = plans.filter(p => p.price > 0)
 
   return (
     <div className="min-h-screen bg-[#050f09] text-white overflow-x-hidden">
