@@ -39,3 +39,8 @@ next-env.d.ts
 
 # prisma
 prisma/*.db
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
