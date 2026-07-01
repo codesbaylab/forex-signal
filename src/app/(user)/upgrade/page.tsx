@@ -2,7 +2,6 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { getUserAccess } from '@/lib/access'
-import { PageHeader } from '@/components/ui/page-header'
 import SubscribePlanButton from '../subscription/SubscribePlanButton'
 import Link from 'next/link'
 
