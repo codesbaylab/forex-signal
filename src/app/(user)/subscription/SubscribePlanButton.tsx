@@ -7,9 +7,10 @@ interface Props {
   planName: string
   price: number
   currency: string
+  billingPeriod?: 'monthly' | 'annual'
 }
 
-export default function SubscribePlanButton({ planId, price, currency }: Props) {
+export default function SubscribePlanButton({ planId, price, currency, billingPeriod = 'monthly' }: Props) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -20,11 +21,11 @@ export default function SubscribePlanButton({ planId, price, currency }: Props) 
       const res = await fetch('/api/subscriptions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ planId, currency }),
+        body: JSON.stringify({ planId, currency, billingPeriod }),
       })
       const json = await res.json()
       if (!json.success) throw new Error(json.error)
-      window.location.reload()
+      window.location.href = '/dashboard'
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Subscription failed')
       setLoading(false)
@@ -35,7 +36,7 @@ export default function SubscribePlanButton({ planId, price, currency }: Props) 
     <div>
       {error && <p className="text-red-500 text-xs mb-2">{error}</p>}
       <Button onClick={subscribe} disabled={loading} className="w-full bg-brand-700 hover:bg-brand-800 text-white">
-        {loading ? 'Processing…' : `Subscribe — $${price}`}
+        {loading ? 'Processing…' : `Subscribe — $${price}${billingPeriod === 'annual' ? '/year' : '/month'}`}
       </Button>
     </div>
   )

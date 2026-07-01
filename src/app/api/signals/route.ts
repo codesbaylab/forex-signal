@@ -32,12 +32,26 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
+    let creatorId: string
 
-    const profile = await prisma.profile.findUnique({ where: { id: user.id } })
-    if (!profile || profile.role !== 'ADMIN') return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 })
+    // Allow API key auth for programmatic publishing (MCP server)
+    const apiKey = request.headers.get('x-api-key')
+    const validApiKey = process.env.SIGNAL_PUBLISH_KEY
+    const isApiKeyAuth = !!(validApiKey && apiKey === validApiKey)
+
+    if (isApiKeyAuth) {
+      // Use the first admin profile as the creator
+      const admin = await prisma.profile.findFirst({ where: { role: 'ADMIN' } })
+      if (!admin) return NextResponse.json({ success: false, error: 'No admin found' }, { status: 500 })
+      creatorId = admin.id
+    } else {
+      const supabase = await createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
+      const profile = await prisma.profile.findUnique({ where: { id: user.id } })
+      if (!profile || profile.role !== 'ADMIN') return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 })
+      creatorId = user.id
+    }
 
     const body = await request.json()
     const parsed = CreateSignalSchema.safeParse(body)
@@ -50,7 +64,7 @@ export async function POST(request: NextRequest) {
         ...rest,
         takeProfits: takeProfits as unknown as import('@prisma/client').Prisma.InputJsonValue,
         status: publishNow ? 'ACTIVE' : 'DRAFT',
-        createdBy: user.id,
+        createdBy: creatorId,
         planAccess: rest.planAccess as unknown as import('@prisma/client').Prisma.InputJsonValue,
         publishedAt: publishNow ? new Date() : null,
       },

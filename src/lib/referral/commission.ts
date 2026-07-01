@@ -29,26 +29,30 @@ export async function distributeCommissions(subscriptionId: string): Promise<voi
 
     if (!profile?.referredById) break
 
-    const uplineUser: { id: string; isBanned: boolean } | null = await prisma.profile.findUnique({
+    const upline: { id: string; isBanned: boolean; trialEndsAt: Date | null } | null = await prisma.profile.findUnique({
       where: { id: profile.referredById },
-      select: { id: true, isBanned: true },
+      select: { id: true, isBanned: true, trialEndsAt: true },
     })
 
-    if (!uplineUser || uplineUser.isBanned) {
+    if (!upline || upline.isBanned) {
       currentUserId = profile.referredById
       continue
     }
 
-    // Only credit users who have an active paid subscription
-    const uplineHasPaidSub = await prisma.subscription.count({
-      where: { userId: uplineUser.id, status: 'ACTIVE' },
+    const now = new Date()
+    const uplineActiveSub = await prisma.subscription.count({
+      where: { userId: upline.id, status: 'ACTIVE' },
     })
-    if (!uplineHasPaidSub) {
-      currentUserId = uplineUser.id
+    const uplineIsPaid = uplineActiveSub > 0
+    const uplineTrialEndsAt = upline.trialEndsAt ? new Date(upline.trialEndsAt) : null
+    const uplineInTrial = uplineTrialEndsAt !== null && uplineTrialEndsAt > now
+
+    // Skip uplines with no access at all (expired trial, not paid, not in trial)
+    if (!uplineIsPaid && !uplineInTrial && uplineTrialEndsAt !== null) {
+      currentUserId = upline.id
       continue
     }
 
-    // Calculate commission amount
     let commissionAmount: Decimal
     if (levelConfig.commissionType === CommissionType.PERCENTAGE) {
       commissionAmount = subscriptionAmount.mul(new Decimal(levelConfig.commissionValue.toString())).div(100)
@@ -56,33 +60,90 @@ export async function distributeCommissions(subscriptionId: string): Promise<voi
       commissionAmount = new Decimal(levelConfig.commissionValue.toString())
     }
 
-    // Credit wallet
-    const { transaction } = await creditWallet({
-      userId: uplineUser.id,
-      currency: subscription.paidCurrency,
-      amount: commissionAmount,
-      type: TransactionType.COMMISSION,
-      reference: subscriptionId,
-      note: `Level ${levelConfig.level} commission from subscription`,
-      metadata: { subscriptionId, level: levelConfig.level, sourceUserId: subscription.userId },
-    })
-
-    // Record commission
-    await prisma.commission.create({
-      data: {
-        recipientUserId: uplineUser.id,
-        sourceUserId: subscription.userId,
-        subscriptionId,
-        level: levelConfig.level,
-        commissionType: levelConfig.commissionType,
-        commissionValue: levelConfig.commissionValue,
-        amount: commissionAmount.toFixed(8) as unknown as number,
+    if (uplineIsPaid) {
+      // Paid upline — credit immediately
+      const { transaction } = await creditWallet({
+        userId: upline.id,
         currency: subscription.paidCurrency,
-        status: CommissionStatus.PAID,
-        transactionId: transaction.id,
-      },
+        amount: commissionAmount,
+        type: TransactionType.COMMISSION,
+        reference: subscriptionId,
+        note: `Level ${levelConfig.level} commission from subscription`,
+        metadata: { subscriptionId, level: levelConfig.level, sourceUserId: subscription.userId },
+      })
+
+      await prisma.commission.create({
+        data: {
+          recipientUserId: upline.id,
+          sourceUserId: subscription.userId,
+          subscriptionId,
+          level: levelConfig.level,
+          commissionType: levelConfig.commissionType,
+          commissionValue: levelConfig.commissionValue,
+          amount: commissionAmount.toFixed(8) as unknown as number,
+          currency: subscription.paidCurrency,
+          status: CommissionStatus.PAID,
+          transactionId: transaction.id,
+        },
+      })
+    } else {
+      // Trial upline — hold as PENDING, expires 7 days after their trial ends
+      const graceEnd = uplineTrialEndsAt
+        ? new Date(uplineTrialEndsAt.getTime() + 7 * 24 * 60 * 60 * 1000)
+        : null
+
+      await prisma.commission.create({
+        data: {
+          recipientUserId: upline.id,
+          sourceUserId: subscription.userId,
+          subscriptionId,
+          level: levelConfig.level,
+          commissionType: levelConfig.commissionType,
+          commissionValue: levelConfig.commissionValue,
+          amount: commissionAmount.toFixed(8) as unknown as number,
+          currency: subscription.paidCurrency,
+          status: CommissionStatus.PENDING,
+          expiresAt: graceEnd,
+        },
+      })
+    }
+
+    currentUserId = upline.id
+  }
+}
+
+export async function releasePendingCommissions(userId: string): Promise<void> {
+  const now = new Date()
+
+  const pending = await prisma.commission.findMany({
+    where: { recipientUserId: userId, status: CommissionStatus.PENDING },
+    include: { subscription: true },
+  })
+
+  for (const commission of pending) {
+    if (commission.expiresAt && commission.expiresAt < now) {
+      // Grace period passed — expire it
+      await prisma.commission.update({
+        where: { id: commission.id },
+        data: { status: CommissionStatus.FAILED },
+      })
+      continue
+    }
+
+    // Credit to wallet
+    const { transaction } = await creditWallet({
+      userId,
+      currency: commission.currency,
+      amount: commission.amount,
+      type: TransactionType.COMMISSION,
+      reference: commission.subscriptionId,
+      note: `Level ${commission.level} commission (released on upgrade)`,
+      metadata: { subscriptionId: commission.subscriptionId, level: commission.level, sourceUserId: commission.sourceUserId },
     })
 
-    currentUserId = uplineUser.id
+    await prisma.commission.update({
+      where: { id: commission.id },
+      data: { status: CommissionStatus.PAID, transactionId: transaction.id },
+    })
   }
 }

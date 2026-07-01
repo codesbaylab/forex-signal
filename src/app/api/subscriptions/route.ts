@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { debitWallet } from '@/lib/wallet/transactions'
-import { distributeCommissions } from '@/lib/referral/commission'
+import { distributeCommissions, releasePendingCommissions } from '@/lib/referral/commission'
 import { Currency, TransactionType } from '@prisma/client'
 
 export async function POST(request: NextRequest) {
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     const monthlyPrice = Number(plan.price)
     const isAnnual = billingPeriod === 'annual'
     const discountSetting = await prisma.setting.findUnique({ where: { key: 'annual_discount_pct' } })
-    const discountPct = Number(discountSetting?.value ?? 17) / 100
+    const discountPct = Number(discountSetting?.value ?? 0) / 100
     const paidAmount = isAnnual
       ? Math.round(monthlyPrice * (1 - discountPct)) * 12
       : monthlyPrice
@@ -57,6 +57,9 @@ export async function POST(request: NextRequest) {
         paidCurrency,
       },
     })
+
+    // Release any pending commissions held because this user was in trial
+    await releasePendingCommissions(user.id)
 
     if (paidAmount > 0) {
       await distributeCommissions(subscription.id)

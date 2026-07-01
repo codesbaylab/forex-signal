@@ -1,12 +1,14 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
+import { getUserAccess } from '@/lib/access'
 import { PageHeader } from '@/components/ui/page-header'
 import { StatCard } from '@/components/ui/stat-card'
 import { TrendingUp, DollarSign, Activity, ArrowDownToLine, ArrowUpFromLine, ArrowLeftRight } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import ReferralLink from './ReferralLink'
+import EarningPotential from './EarningPotential'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -23,6 +25,7 @@ export default async function DashboardPage() {
   if (!profile) redirect('/auth/login')
 
   const activeSubscription = profile.subscriptions[0] ?? null
+  const access = getUserAccess({ trialEndsAt: profile.trialEndsAt }, activeSubscription)
 
   const usdtWallet = profile.wallets.find((w) => w.currency === 'USDT_TRC20')
   const usdtBalance = Number(usdtWallet?.balance ?? 0)
@@ -49,6 +52,27 @@ export default async function DashboardPage() {
   })
 
   const totalReferrals = await prisma.profile.count({ where: { referredById: user.id } })
+
+  // Earning potential — trial downline who haven't subscribed yet
+  const trialDownline = await prisma.profile.count({
+    where: {
+      referredById: user.id,
+      subscriptions: { none: { status: 'ACTIVE' } },
+      trialEndsAt: { not: null },
+    },
+  })
+  const pendingCommissions = await prisma.commission.aggregate({
+    where: { recipientUserId: user.id, status: 'PENDING' },
+    _sum: { amount: true },
+  })
+  const pendingAmount = Number(pendingCommissions._sum.amount ?? 0)
+  const l1Config = await prisma.referralConfig.findUnique({ where: { level: 1 } })
+  const l1Rate = l1Config ? Number(l1Config.commissionValue) : 35
+  const planPrice = await prisma.plan.findFirst({
+    where: { isActive: true, price: { gt: 0 } },
+    select: { price: true },
+  })
+  const annualPrice = planPrice ? Number(planPrice.price) * 12 : 48
 
   // Real market session hours (UTC)
   const nowUTC = new Date()
@@ -107,6 +131,17 @@ export default async function DashboardPage() {
         <StatCard title="Active Signals" value={activeSignals} change="Live right now" changePositive icon={Activity} />
         <StatCard title="Win Rate" value={`${winRate}%`} change={`${allSignals.length} total signals`} changePositive icon={TrendingUp} />
         <StatCard title="Commissions" value={`$${commissionEarned}`} change="Total earned" changePositive icon={DollarSign} />
+      </div>
+
+      {/* Earning Potential */}
+      <div className="mb-7">
+        <EarningPotential
+          trialDownlineCount={trialDownline}
+          pendingCommissions={pendingAmount}
+          annualPrice={annualPrice}
+          l1Rate={l1Rate}
+          inTrial={access.inTrial}
+        />
       </div>
 
       {/* Active Subscription + Market Sessions */}

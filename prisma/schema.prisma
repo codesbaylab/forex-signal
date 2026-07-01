@@ -138,6 +138,7 @@ model Profile {
   isBanned     Boolean   @default(false)
   bannedAt     DateTime?
   bannedReason String?
+  trialEndsAt  DateTime?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
@@ -348,6 +349,7 @@ model Commission {
   currency        Currency
   status          CommissionStatus @default(PENDING)
   transactionId   String?
+  expiresAt       DateTime?
   createdAt       DateTime         @default(now())
 
   recipient    Profile      @relation("CommissionRecipient", fields: [recipientUserId], references: [id])

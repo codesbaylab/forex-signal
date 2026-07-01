@@ -6,10 +6,11 @@ async function main() {
   // Default settings
   const settings = [
     { key: 'maintenance_mode', value: 'false' },
-    { key: 'site_name', value: 'ForexSignal' },
+    { key: 'site_name', value: 'SignalFX Pro' },
     { key: 'min_withdrawal_usdt', value: '10' },
-    { key: 'referral_levels_count', value: '4' },
     { key: 'supported_cryptos', value: 'USDT_TRC20' },
+    { key: 'trial_days', value: '7' },
+    { key: 'annual_discount_pct', value: '0' },
   ]
 
   for (const s of settings) {
@@ -20,61 +21,56 @@ async function main() {
     })
   }
 
-  // Default referral levels
+  // Commission levels — 7-level unilevel, 100% pool
   const levels = [
-    { level: 1, commissionType: CommissionType.PERCENTAGE, commissionValue: 10 },
-    { level: 2, commissionType: CommissionType.PERCENTAGE, commissionValue: 5 },
-    { level: 3, commissionType: CommissionType.PERCENTAGE, commissionValue: 3 },
-    { level: 4, commissionType: CommissionType.PERCENTAGE, commissionValue: 2 },
+    { level: 1, commissionType: CommissionType.PERCENTAGE, commissionValue: 35 },
+    { level: 2, commissionType: CommissionType.PERCENTAGE, commissionValue: 20 },
+    { level: 3, commissionType: CommissionType.PERCENTAGE, commissionValue: 15 },
+    { level: 4, commissionType: CommissionType.PERCENTAGE, commissionValue: 12 },
+    { level: 5, commissionType: CommissionType.PERCENTAGE, commissionValue: 8 },
+    { level: 6, commissionType: CommissionType.PERCENTAGE, commissionValue: 6 },
+    { level: 7, commissionType: CommissionType.PERCENTAGE, commissionValue: 4 },
   ]
 
   for (const l of levels) {
     await prisma.referralConfig.upsert({
       where: { level: l.level },
-      update: {},
+      update: { commissionValue: l.commissionValue, commissionType: l.commissionType, isActive: true },
       create: l,
     })
   }
 
-  // Default plans
-  const plans = [
-    {
-      name: 'Free',
-      description: 'Limited signals with 1 hour delay',
-      price: 0,
-      durationDays: 36500,
-      features: JSON.stringify(['Up to 3 signals/day', '1 hour delay', 'Major pairs only']),
-      signalAccess: JSON.stringify(['free']),
-      sortOrder: 0,
-    },
-    {
-      name: 'Basic',
-      description: 'Real-time signals on major pairs',
-      price: 29,
-      durationDays: 30,
-      features: JSON.stringify(['Unlimited signals', 'Real-time alerts', 'Major pairs', 'Signal history']),
-      signalAccess: JSON.stringify(['free', 'basic']),
-      sortOrder: 1,
-    },
-    {
-      name: 'Pro',
-      description: 'All pairs including Gold and indices',
-      price: 59,
-      durationDays: 30,
-      features: JSON.stringify(['Everything in Basic', 'Gold & indices', 'VIP analysis', 'Priority support']),
-      signalAccess: JSON.stringify(['free', 'basic', 'pro']),
-      sortOrder: 2,
-    },
-  ]
-
-  for (const plan of plans) {
-    const existing = await prisma.plan.findFirst({ where: { name: plan.name } })
-    if (!existing) {
-      await prisma.plan.create({ data: plan })
-    }
+  // Plans — Pro only (annual billing at $4/month = $48/year)
+  const proExisting = await prisma.plan.findFirst({ where: { name: 'Pro' } })
+  if (!proExisting) {
+    await prisma.plan.create({
+      data: {
+        name: 'Pro',
+        description: 'Full access to all signals, real-time alerts, and the referral program',
+        price: 4, // $4/month base; shown as "$4/mo, billed $48/year"
+        durationDays: 30,
+        features: JSON.stringify([
+          'Real-time XAU/USD signals',
+          'H1 + H4 ICT sweep strategy',
+          'Entry, SL, and TP levels',
+          'Market analysis on every signal',
+          'Referral program — earn from 7 levels',
+          'Priority support',
+        ]),
+        signalAccess: JSON.stringify(['pro']),
+        isActive: true,
+        sortOrder: 0,
+      },
+    })
+  } else {
+    // Update price to $4
+    await prisma.plan.update({
+      where: { id: proExisting.id },
+      data: { price: 4, durationDays: 30 },
+    })
   }
 
-  console.log('✅ Seed complete')
+  console.log('Seed complete')
 }
 
 main()

@@ -16,15 +16,21 @@ interface Props {
   signalId?: string
 }
 
+function getPriceStep(pair: string): string {
+  if (pair.startsWith('XAU') || pair.startsWith('XAG')) return '0.01'
+  if (pair.includes('JPY')) return '0.001'
+  return '0.00001'
+}
+
 export default function SignalForm({ plans, defaultValues, signalId }: Props) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const { register, handleSubmit, control, formState: { errors } } = useForm<CreateSignalInput>({
+  const { register, handleSubmit, control, watch, formState: { errors } } = useForm<CreateSignalInput>({
     resolver: zodResolver(CreateSignalSchema),
     defaultValues: defaultValues ?? {
-      pair: 'EUR/USD',
+      pair: 'XAU/USD',
       direction: 'BUY',
       takeProfits: [{ level: 1, price: 0 }],
       timeframe: 'H1',
@@ -34,6 +40,8 @@ export default function SignalForm({ plans, defaultValues, signalId }: Props) {
   })
 
   const { fields, append, remove } = useFieldArray({ control, name: 'takeProfits' })
+  const selectedPair = watch('pair')
+  const priceStep = getPriceStep(selectedPair ?? 'EUR/USD')
 
   async function onSubmit(data: CreateSignalInput) {
     setLoading(true)
@@ -84,12 +92,12 @@ export default function SignalForm({ plans, defaultValues, signalId }: Props) {
         <div className="grid grid-cols-2 gap-5">
           <div>
             <Label htmlFor="entryPrice">Entry Price</Label>
-            <Input id="entryPrice" type="number" step="0.00001" className="mt-1" {...register('entryPrice', { valueAsNumber: true })} />
+            <Input id="entryPrice" type="number" step={priceStep} className="mt-1" {...register('entryPrice', { valueAsNumber: true })} />
             {errors.entryPrice && <p className="text-red-500 text-xs mt-1">{errors.entryPrice.message}</p>}
           </div>
           <div>
             <Label htmlFor="stopLoss">Stop Loss</Label>
-            <Input id="stopLoss" type="number" step="0.00001" className="mt-1" {...register('stopLoss', { valueAsNumber: true })} />
+            <Input id="stopLoss" type="number" step={priceStep} className="mt-1" {...register('stopLoss', { valueAsNumber: true })} />
             {errors.stopLoss && <p className="text-red-500 text-xs mt-1">{errors.stopLoss.message}</p>}
           </div>
         </div>
@@ -103,7 +111,7 @@ export default function SignalForm({ plans, defaultValues, signalId }: Props) {
             {fields.map((field, i) => (
               <div key={field.id} className="flex gap-3 items-center">
                 <span className="text-xs text-gray-400 w-8">TP{i + 1}</span>
-                <Input type="number" step="0.00001" {...register(`takeProfits.${i}.price`, { valueAsNumber: true })} className="flex-1" />
+                <Input type="number" step={priceStep} {...register(`takeProfits.${i}.price`, { valueAsNumber: true })} className="flex-1" />
                 <input type="hidden" {...register(`takeProfits.${i}.level`, { valueAsNumber: true })} value={i + 1} />
                 {fields.length > 1 && (
                   <Button type="button" variant="ghost" className="text-red-500 text-xs h-7 px-2" onClick={() => remove(i)}>Remove</Button>

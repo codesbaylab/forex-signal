@@ -37,6 +37,7 @@ export default function SettingsForm({ initialSettings: s }: Props) {
   const [siteName, setSiteName] = useState(s['site_name'] ?? 'SignalFX Pro')
   const [maintenance, setMaintenance] = useState(s['maintenance_mode'] === 'true')
   const [minUSDT, setMinUSDT] = useState(s['min_withdrawal_usdt'] ?? '10')
+  const [trialDays, setTrialDays] = useState(s['trial_days'] ?? '7')
 
   // NowPayments
   const [npEnabled, setNpEnabled] = useState(s['payment_nowpayments_enabled'] === 'true')
@@ -45,7 +46,7 @@ export default function SettingsForm({ initialSettings: s }: Props) {
   const [npSandbox, setNpSandbox] = useState(s['payment_nowpayments_sandbox'] === 'true')
 
   // Billing
-  const [annualDiscount, setAnnualDiscount] = useState(s['annual_discount_pct'] ?? '17')
+  const [annualDiscount, setAnnualDiscount] = useState(s['annual_discount_pct'] ?? '0')
 
   // Manual deposit
   const [manualEnabled, setManualEnabled] = useState(s['payment_manual_enabled'] === 'true')
@@ -68,6 +69,11 @@ export default function SettingsForm({ initialSettings: s }: Props) {
     e.preventDefault()
     setError(null)
 
+    const days = parseInt(trialDays, 10)
+    if (isNaN(days) || days < 1 || days > 365) {
+      setError('Trial days must be between 1 and 365.')
+      return
+    }
     if (npEnabled && !npApiKey.trim()) {
       setError('NowPayments API Key is required when NowPayments is enabled.')
       return
@@ -86,6 +92,7 @@ export default function SettingsForm({ initialSettings: s }: Props) {
       site_name: siteName,
       maintenance_mode: String(maintenance),
       min_withdrawal_usdt: minUSDT,
+      trial_days: String(days),
       annual_discount_pct: annualDiscount,
       payment_nowpayments_enabled: String(npEnabled),
       payment_nowpayments_api_key: npApiKey,
@@ -126,6 +133,26 @@ export default function SettingsForm({ initialSettings: s }: Props) {
           </div>
         </div>
 
+        {/* Trial */}
+        <Section title="Trial Period" subtitle="How long new users get free access after signup">
+          <div className="flex items-center gap-3">
+            <Label className="w-32 text-xs text-gray-500">Trial Days</Label>
+            <Input
+              type="number"
+              min="1"
+              max="365"
+              step="1"
+              value={trialDays}
+              onChange={(e) => setTrialDays(e.target.value)}
+              className="w-24"
+            />
+            <span className="text-xs text-gray-400">days of free access for new signups</span>
+          </div>
+          <p className="text-xs text-gray-400">
+            Users also get a 7-day grace period after trial ends before commissions expire.
+          </p>
+        </Section>
+
         {/* Withdrawal */}
         <Section title="Withdrawal" subtitle="Minimum amounts users can withdraw">
           <div className="flex items-center gap-3">
@@ -147,7 +174,7 @@ export default function SettingsForm({ initialSettings: s }: Props) {
               onChange={(e) => setAnnualDiscount(e.target.value)}
               className="w-28"
             />
-            <span className="text-xs text-gray-400">% off when billed annually (shown as &ldquo;Save X%&rdquo;)</span>
+            <span className="text-xs text-gray-400">% off when billed annually (0 = no discount, billed at full monthly × 12)</span>
           </div>
         </Section>
 
@@ -247,7 +274,7 @@ export default function SettingsForm({ initialSettings: s }: Props) {
 
         {!npEnabled && !manualEnabled && (
           <div className="bg-yellow-50 border border-yellow-100 rounded-xl p-4">
-            <p className="text-xs text-yellow-700 font-medium">⚠️ No payment method enabled — users cannot deposit.</p>
+            <p className="text-xs text-yellow-700 font-medium">No payment method enabled — users cannot deposit.</p>
           </div>
         )}
 

@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "mt5-signals": {
+      "command": "C:\\Users\\PC\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe",
+      "args": ["tools/mt5_server.py"],
+      "env": {
+        "SIGNAL_API_URL": "https://your-app.vercel.app",
+        "SIGNAL_PUBLISH_KEY": "your-secret-key-here"
+      }
+    }
+  }
+}
