@@ -19,27 +19,38 @@ const TICKER_FALLBACK = [
   { pair: 'USD/JPY', dir: 'SELL', change: '-0.55%', price: '151.820' },
 ]
 
+const STATS = [
+  { value: '7 Days', label: 'Free Trial' },
+  { value: '$4/mo',  label: 'After Trial' },
+  { value: '7',      label: 'Commission Levels' },
+  { value: '100%',   label: 'Paid to Network' },
+]
+
+const COMMISSION_LEVELS = [
+  { level: 'L1', label: 'Direct Referral', pct: 35 },
+  { level: 'L2', label: 'Level 2',         pct: 20 },
+  { level: 'L3', label: 'Level 3',         pct: 15 },
+  { level: 'L4', label: 'Level 4',         pct: 12 },
+  { level: 'L5', label: 'Level 5',         pct: 8  },
+  { level: 'L6', label: 'Level 6',         pct: 6  },
+  { level: 'L7', label: 'Level 7',         pct: 4  },
+]
 
 const FREE_FEATURES = [
-  { icon: '📡', title: 'Live Price Feed', desc: 'XAU/USD, EUR/USD, GBP/USD & USD/JPY updated every 5 minutes.' },
-  { icon: '🔐', title: 'USDT Wallet', desc: 'Built-in USDT TRC20 wallet — deposit, withdraw and transfer freely.' },
-  { icon: '📈', title: 'Signal History', desc: 'Browse all closed signals with entry, TP, SL and final result.' },
+  { icon: '📡', title: 'Live Price Feed',   desc: 'XAU/USD, EUR/USD, GBP/USD & USD/JPY updated every 5 minutes.' },
+  { icon: '🔐', title: 'USDT Wallet',       desc: 'Built-in USDT TRC20 wallet — deposit, withdraw and transfer freely.' },
+  { icon: '📈', title: 'Signal History',    desc: 'Browse all closed signals with entry, TP, SL and final result.' },
+  { icon: '🔗', title: 'Referral Link',     desc: 'Your referral link is active from day 1 — start building your network during the trial.' },
 ]
 
 const PRO_FEATURES = [
-  { icon: '⚡', title: 'Live Active Signals', desc: 'Real-time BUY/SELL alerts with entry, TP and SL the moment they are published.' },
-  { icon: '🎁', title: 'Referral Commissions', desc: 'Get your unique referral link and earn multi-level commissions on every paid subscription in your network.' },
-  { icon: '📊', title: 'Technical AI Analysis', desc: 'RSI, MACD, EMA and Bollinger Bands analyzed 24/7 across XAU/USD and major forex pairs.' },
+  { icon: '⚡', title: 'Live AI Signals',        desc: 'Real-time BUY/SELL alerts with entry, TP and SL the moment they are published.' },
+  { icon: '💰', title: '7-Level Commissions',    desc: 'Earn from every paid subscriber in your network — 7 levels deep, automatically.' },
+  { icon: '📊', title: 'Full Trade Analysis',    desc: 'Every signal comes with market structure bias, session context and risk/reward breakdown.' },
+  { icon: '🏆', title: 'Priority Support',       desc: 'Dedicated support tickets with faster response times for Pro members.' },
 ]
 
 type LivePlan = { id: string; name: string; price: number; features: string[] }
-
-const STATS = [
-  { value: 'Free', label: 'To Join' },
-  { value: '89%', label: 'Signal Win Rate' },
-  { value: '3,200+', label: 'Signals / Month' },
-  { value: 'USDT', label: 'TRC20 Payments' },
-]
 
 /* ─── helpers ─── */
 const ease = [0.25, 0.46, 0.45, 0.94] as const
@@ -49,14 +60,12 @@ function useTilt() {
   const y = useMotionValue(0)
   const rotateX = useSpring(useTransform(y, [-0.5, 0.5], [10, -10]), { stiffness: 300, damping: 30 })
   const rotateY = useSpring(useTransform(x, [-0.5, 0.5], [-10, 10]), { stiffness: 300, damping: 30 })
-
   function onMove(e: React.MouseEvent<HTMLDivElement>) {
     const rect = e.currentTarget.getBoundingClientRect()
     x.set((e.clientX - rect.left) / rect.width - 0.5)
     y.set((e.clientY - rect.top) / rect.height - 0.5)
   }
   function onLeave() { x.set(0); y.set(0) }
-
   return { rotateX, rotateY, onMove, onLeave }
 }
 
@@ -102,23 +111,16 @@ function formatLandingPrice(pair: string, price: string): string {
 
 /* ─── page ─── */
 export default function LandingPage() {
-  const [scrolled, setScrolled] = useState(false)
-  const [ticker, setTicker] = useState(TICKER_FALLBACK)
-  const [loggedIn, setLoggedIn] = useState(false)
-  const [landingBilling, setLandingBilling] = useState<'monthly' | 'annual'>('monthly')
-  const [discountPct, setDiscountPct] = useState(17)
-  const [plans, setPlans] = useState<LivePlan[]>([])
+  const [scrolled, setScrolled]   = useState(false)
+  const [ticker, setTicker]       = useState(TICKER_FALLBACK)
+  const [loggedIn, setLoggedIn]   = useState(false)
+  const [plans, setPlans]         = useState<LivePlan[]>([])
 
   useEffect(() => {
-    fetch('/api/settings/public').then(r => r.json()).then(j => {
-      if (j.annualDiscountPct) setDiscountPct(j.annualDiscountPct)
-    }).catch(() => {})
     fetch('/api/plans').then(r => r.json()).then(j => {
       if (j.success && Array.isArray(j.data)) {
         setPlans(j.data.map((p: { id: string; name: string; price: number | string; features: unknown }) => ({
-          id: p.id,
-          name: p.name,
-          price: Number(p.price),
+          id: p.id, name: p.name, price: Number(p.price),
           features: Array.isArray(p.features) ? p.features as string[] : [],
         })))
       }
@@ -126,9 +128,7 @@ export default function LandingPage() {
   }, [])
 
   useEffect(() => {
-    createClient().auth.getUser().then(({ data }) => {
-      if (data.user) setLoggedIn(true)
-    })
+    createClient().auth.getUser().then(({ data }) => { if (data.user) setLoggedIn(true) })
   }, [])
 
   useEffect(() => {
@@ -138,35 +138,27 @@ export default function LandingPage() {
   }, [])
 
   useEffect(() => {
-    fetch('/api/forex/prices')
-      .then((r) => r.json())
-      .then((json) => {
-        if (!json.data || Object.keys(json.data).length === 0) return
-        setTicker((prev) =>
-          prev.map((t) => {
-            const live = json.data[t.pair]
-            if (!live) return t
-            const pct = parseFloat(live.pct)
-            return {
-              pair: t.pair,
-              dir: pct >= 0 ? 'BUY' : 'SELL',
-              price: formatLandingPrice(t.pair, live.price),
-              change: `${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%`,
-            }
-          })
-        )
-      })
-      .catch(() => {})
+    fetch('/api/forex/prices').then(r => r.json()).then(json => {
+      if (!json.data || Object.keys(json.data).length === 0) return
+      setTicker(prev => prev.map(t => {
+        const live = json.data[t.pair]
+        if (!live) return t
+        const pct = parseFloat(live.pct)
+        return { pair: t.pair, dir: pct >= 0 ? 'BUY' : 'SELL', price: formatLandingPrice(t.pair, live.price), change: `${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%` }
+      }))
+    }).catch(() => {})
   }, [])
 
   const heroRef = useRef<HTMLElement>(null)
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] })
-  const heroY = useTransform(scrollYProgress, [0, 1], ['0%', '40%'])
+  const heroY       = useTransform(scrollYProgress, [0, 1], ['0%', '40%'])
   const heroOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0])
-  const heroScale = useTransform(scrollYProgress, [0, 1], [1, 0.88])
+  const heroScale   = useTransform(scrollYProgress, [0, 1], [1, 0.88])
   const heroRotateX = useTransform(scrollYProgress, [0, 0.6], [0, 8])
-
   const doubled = [...ticker, ...ticker]
+
+  const proPlans = plans.filter(p => p.price > 0)
+  const annualPrice = proPlans[0] ? proPlans[0].price * 12 : 48
 
   return (
     <div className="min-h-screen bg-[#050f09] text-white overflow-x-hidden">
@@ -184,7 +176,7 @@ export default function LandingPage() {
             <span className="font-extrabold text-white text-lg tracking-tight">SignalFX Pro</span>
           </div>
           <div className="hidden md:flex items-center gap-8 text-sm text-white/60 font-medium">
-            {['Features', 'Pricing'].map((item) => (
+            {['Features', 'Commissions', 'Pricing'].map(item => (
               <a key={item} href={`#${item.toLowerCase()}`} className="hover:text-white transition-colors">{item}</a>
             ))}
           </div>
@@ -197,7 +189,7 @@ export default function LandingPage() {
               <>
                 <Link href="/auth/login" className="text-sm text-white/70 hover:text-white px-4 py-2 transition-colors font-medium">Login</Link>
                 <Link href="/auth/register" className="bg-gradient-to-r from-green-500 to-green-700 hover:from-green-400 hover:to-green-600 text-white font-bold px-5 py-2 rounded-xl text-sm shadow-lg shadow-green-900/40 transition-all duration-200 hover:scale-105">
-                  Get Started Free
+                  Try Free — 7 Days
                 </Link>
               </>
             )}
@@ -207,14 +199,13 @@ export default function LandingPage() {
 
       {/* ── Hero ── */}
       <section ref={heroRef} className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-24 pb-20 overflow-hidden">
-        {/* Parallax background */}
         <motion.div className="absolute inset-0 pointer-events-none" style={{ y: heroY }}>
           <div className="absolute top-1/4 left-1/4 w-[700px] h-[700px] bg-green-700/20 rounded-full blur-[140px] animate-glow" />
           <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-emerald-500/10 rounded-full blur-[120px] animate-glow" style={{ animationDelay: '1.5s' }} />
           <div className="absolute inset-0 opacity-[0.035]" style={{ backgroundImage: 'linear-gradient(#22c55e 1px, transparent 1px), linear-gradient(90deg, #22c55e 1px, transparent 1px)', backgroundSize: '60px 60px' }} />
         </motion.div>
 
-        {/* Floating signal cards — left */}
+        {/* Floating card left */}
         <motion.div
           className="absolute left-[4%] top-[28%] hidden xl:block"
           initial={{ opacity: 0, x: -80, rotateY: -25 }}
@@ -224,16 +215,16 @@ export default function LandingPage() {
         >
           <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 w-54 shadow-2xl">
             <div className="flex items-center justify-between mb-2">
-              <span className="font-bold text-white text-sm">EUR/USD</span>
+              <span className="font-bold text-white text-sm">XAU/USD</span>
               <span className="bg-green-500/20 text-green-400 text-xs font-bold px-2 py-0.5 rounded-full">BUY</span>
             </div>
-            <div className="text-2xl font-black text-white mb-2">1.0842</div>
-            <div className="flex justify-between text-xs text-white/40 mb-2"><span>TP 1.0910</span><span>SL 1.0800</span></div>
+            <div className="text-2xl font-black text-white mb-2">3971.94</div>
+            <div className="flex justify-between text-xs text-white/40 mb-2"><span>TP 3992.72</span><span>SL 3961.55</span></div>
             <div className="h-1.5 bg-white/10 rounded-full overflow-hidden"><div className="h-full w-2/3 bg-gradient-to-r from-green-500 to-emerald-400 rounded-full animate-pulse" /></div>
           </div>
         </motion.div>
 
-        {/* Floating signal cards — right */}
+        {/* Floating card right */}
         <motion.div
           className="absolute right-[4%] top-[32%] hidden xl:block"
           initial={{ opacity: 0, x: 80, rotateY: 25 }}
@@ -243,12 +234,12 @@ export default function LandingPage() {
         >
           <div className="bg-white/5 backdrop-blur-xl border border-green-500/30 rounded-2xl p-4 w-54 shadow-2xl">
             <div className="flex items-center justify-between mb-2">
-              <span className="font-bold text-white text-sm">XAU/USD</span>
-              <span className="bg-green-500/20 text-green-400 text-xs font-bold px-2 py-0.5 rounded-full">WIN ✓</span>
+              <span className="font-bold text-white text-sm">Commission</span>
+              <span className="bg-green-500/20 text-green-400 text-xs font-bold px-2 py-0.5 rounded-full">L1 · 35%</span>
             </div>
-            <div className="text-2xl font-black text-white mb-2">2341.50</div>
-            <div className="flex justify-between text-xs text-white/40 mb-2"><span>TP 2380.00</span><span>SL 2315.00</span></div>
-            <div className="text-green-400 font-bold text-sm">+385 pips</div>
+            <div className="text-2xl font-black text-white mb-1">$16.80</div>
+            <div className="text-xs text-white/40 mb-2">from 1 referral · $48/yr plan</div>
+            <div className="text-green-400 font-bold text-sm">Paid to wallet ✓</div>
           </div>
         </motion.div>
 
@@ -262,7 +253,7 @@ export default function LandingPage() {
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.1 }}
           >
             <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse inline-block" />
-            Live signals active now — 3 new in the last hour
+            7-day free trial · No card needed · Referral link active from day 1
           </motion.div>
 
           <motion.h1
@@ -271,9 +262,9 @@ export default function LandingPage() {
             transition={{ duration: 0.9, delay: 0.2, ease }}
             style={{ transformPerspective: 1200 }}
           >
-            Trade Smarter
+            AI Signals.
             <span className="block bg-gradient-to-r from-green-400 via-emerald-300 to-green-500 bg-clip-text text-transparent animate-gradient-x">
-              with AI Signals
+              Unlimited Income.
             </span>
           </motion.h1>
 
@@ -282,7 +273,7 @@ export default function LandingPage() {
             initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4, ease }}
           >
-            Sign up free and explore the platform. Upgrade to Pro to unlock live signals and start earning through our referral program.
+            Get daily Gold trade signals with entry, stop loss and take profit — and earn from every person in your network who subscribes, across <strong className="text-white/80">7 levels deep</strong>.
           </motion.p>
 
           <motion.div
@@ -291,7 +282,7 @@ export default function LandingPage() {
             transition={{ duration: 0.8, delay: 0.55, ease }}
           >
             <Link href="/auth/register" className="group relative bg-gradient-to-r from-green-500 to-green-700 text-white font-bold px-10 py-4 rounded-2xl text-base shadow-xl shadow-green-900/50 transition-all duration-300 hover:scale-110 hover:shadow-green-700/60 overflow-hidden">
-              <span className="relative z-10">Start for Free →</span>
+              <span className="relative z-10">Start Free Trial →</span>
               <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             </Link>
             <Link href="/auth/login" className="border border-white/20 hover:border-green-500/50 text-white/80 hover:text-white font-semibold px-10 py-4 rounded-2xl text-base transition-all duration-300 hover:bg-white/5 hover:scale-105">
@@ -303,7 +294,7 @@ export default function LandingPage() {
             className="text-white/25 text-sm mt-5"
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.9 }}
           >
-            No credit card required · Cancel anytime · Crypto payments
+            7 days free · Then $4/month billed annually · USDT TRC20 payments
           </motion.p>
         </motion.div>
 
@@ -354,17 +345,17 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto">
           <ScrollReveal className="text-center mb-14">
             <div className="inline-block bg-green-500/10 border border-green-500/20 text-green-400 text-xs font-bold px-3 py-1 rounded-full mb-4">WHAT YOU GET</div>
-            <h2 className="text-4xl md:text-5xl font-black text-white mb-3">Free to start. Powerful when you&apos;re ready.</h2>
-            <p className="text-white/45 text-lg">No credit card needed. Upgrade only when it makes sense for you.</p>
+            <h2 className="text-4xl md:text-5xl font-black text-white mb-3">Free trial. Full access. Real earnings.</h2>
+            <p className="text-white/45 text-lg">Start for free. Your referral link is live from day 1 — commissions held and released the moment you upgrade.</p>
           </ScrollReveal>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {/* Free column */}
+            {/* Free / Trial column */}
             <ScrollReveal delay={0}>
               <div className="bg-white/5 border border-white/10 rounded-2xl p-7 h-full">
-                <div className="inline-block bg-white/10 text-white/70 text-xs font-bold px-3 py-1 rounded-full mb-6">FREE — ALWAYS</div>
+                <div className="inline-block bg-white/10 text-white/70 text-xs font-bold px-3 py-1 rounded-full mb-6">7-DAY FREE TRIAL</div>
                 <div className="space-y-5">
-                  {FREE_FEATURES.map((f) => (
+                  {FREE_FEATURES.map(f => (
                     <div key={f.title} className="flex gap-4">
                       <span className="text-2xl shrink-0">{f.icon}</span>
                       <div>
@@ -375,7 +366,7 @@ export default function LandingPage() {
                   ))}
                 </div>
                 <div className="mt-8 pt-6 border-t border-white/10">
-                  <p className="text-white/30 text-xs text-center">No subscription required</p>
+                  <p className="text-white/30 text-xs text-center">No credit card · No commitment · Cancel anytime</p>
                 </div>
               </div>
             </ScrollReveal>
@@ -383,9 +374,9 @@ export default function LandingPage() {
             {/* Pro column */}
             <ScrollReveal delay={0.1}>
               <div className="bg-gradient-to-b from-green-600/30 to-green-900/30 border border-green-500/30 rounded-2xl p-7 h-full relative">
-                <div className="inline-block bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full mb-6">PRO — UNLOCK EVERYTHING</div>
+                <div className="inline-block bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full mb-6">PRO — $4/mo · $48/yr</div>
                 <div className="space-y-5">
-                  {PRO_FEATURES.map((f) => (
+                  {PRO_FEATURES.map(f => (
                     <div key={f.title} className="flex gap-4">
                       <span className="text-2xl shrink-0">{f.icon}</span>
                       <div>
@@ -397,7 +388,7 @@ export default function LandingPage() {
                 </div>
                 <div className="mt-8 pt-6 border-t border-white/10">
                   <a href="/auth/register" className="block text-center bg-green-500 hover:bg-green-400 text-white font-bold py-3 rounded-xl transition-colors text-sm">
-                    Start Free → Upgrade Anytime
+                    Start Free Trial →
                   </a>
                 </div>
               </div>
@@ -406,118 +397,165 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── Pricing ── */}
-      <section id="pricing" className="py-24 px-6">
+      {/* ── Commission Structure ── */}
+      <section id="commissions" className="py-24 px-6">
         <div className="max-w-4xl mx-auto">
-          <ScrollReveal className="text-center mb-10">
-            <div className="inline-block bg-green-500/10 border border-green-500/20 text-green-400 text-xs font-bold px-3 py-1 rounded-full mb-4">PRICING</div>
-            <h2 className="text-4xl md:text-5xl font-black text-white mb-3">Simple, transparent pricing</h2>
-            <p className="text-white/45 text-lg">Pay with USDT. Cancel anytime.</p>
+          <ScrollReveal className="text-center mb-14">
+            <div className="inline-block bg-green-500/10 border border-green-500/20 text-green-400 text-xs font-bold px-3 py-1 rounded-full mb-4">REFERRAL PROGRAM</div>
+            <h2 className="text-4xl md:text-5xl font-black text-white mb-3">Earn from 7 levels deep</h2>
+            <p className="text-white/45 text-lg max-w-xl mx-auto">
+              100% of every subscription fee flows back to the network. You earn from everyone your referrals bring in — down 7 levels.
+            </p>
           </ScrollReveal>
 
-          {/* Billing toggle */}
-          <div className="flex justify-center mb-10">
-            <div className="inline-flex items-center bg-white/10 rounded-xl p-1 gap-1">
-              <button
-                onClick={() => setLandingBilling('monthly')}
-                className={`px-6 py-2 rounded-lg text-sm font-semibold transition-all ${landingBilling === 'monthly' ? 'bg-white text-gray-900 shadow' : 'text-white/60 hover:text-white'}`}
-              >
-                Monthly
-              </button>
-              <button
-                onClick={() => setLandingBilling('annual')}
-                className={`px-6 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 ${landingBilling === 'annual' ? 'bg-white text-gray-900 shadow' : 'text-white/60 hover:text-white'}`}
-              >
-                Annually
-                <span className="bg-green-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">Save {discountPct}%</span>
-              </button>
+          <ScrollReveal delay={0.1}>
+            <div className="bg-white/5 border border-white/10 rounded-3xl p-8 mb-8">
+              <div className="grid grid-cols-7 gap-3 mb-6">
+                {COMMISSION_LEVELS.map((lvl, i) => (
+                  <div key={lvl.level} className="text-center">
+                    <div className={`rounded-2xl py-4 mb-2 ${i === 0 ? 'bg-green-500/30 border border-green-500/50' : 'bg-white/5 border border-white/10'}`}>
+                      <p className="text-xs font-bold text-green-400 mb-1">{lvl.level}</p>
+                      <p className={`font-extrabold ${i === 0 ? 'text-2xl text-white' : 'text-xl text-white/80'}`}>{lvl.pct}%</p>
+                    </div>
+                    <p className="text-white/30 text-xs hidden md:block">{lvl.label}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="border-t border-white/10 pt-6">
+                <p className="text-center text-white/40 text-sm">
+                  Example: 5 direct referrals × 5 each = <span className="text-white/70 font-semibold">3,125 people at Level 3</span> — each paying $48/yr = <span className="text-green-400 font-bold">${(3125 * 48 * 0.15).toLocaleString()} from L3 alone</span>
+                </p>
+              </div>
             </div>
-          </div>
+          </ScrollReveal>
 
-          <div className={`grid grid-cols-1 md:grid-cols-${1 + plans.length} gap-6 max-w-${plans.length > 1 ? '5xl' : '3xl'} mx-auto`}>
-            {/* Static Free card — always shown */}
+          <ScrollReveal delay={0.2}>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              {[
+                { icon: '🔗', title: 'Link Active on Day 1', desc: 'Start referring during your free trial. Commissions are held and paid out the moment you upgrade.' },
+                { icon: '⚡', title: 'Instant Payouts', desc: 'Commissions go straight to your USDT wallet when someone in your network subscribes.' },
+                { icon: '♾️', title: 'Passive Forever', desc: 'Annual renewals pay commission again. Build once, earn every year.' },
+              ].map(item => (
+                <div key={item.title} className="bg-white/5 border border-white/10 rounded-2xl p-5">
+                  <div className="text-3xl mb-3">{item.icon}</div>
+                  <p className="font-bold text-white text-sm mb-1">{item.title}</p>
+                  <p className="text-white/40 text-xs leading-relaxed">{item.desc}</p>
+                </div>
+              ))}
+            </div>
+          </ScrollReveal>
+        </div>
+      </section>
+
+      {/* ── Pricing ── */}
+      <section id="pricing" className="py-24 px-6 border-t border-white/5 bg-white/[0.015]">
+        <div className="max-w-3xl mx-auto">
+          <ScrollReveal className="text-center mb-10">
+            <div className="inline-block bg-green-500/10 border border-green-500/20 text-green-400 text-xs font-bold px-3 py-1 rounded-full mb-4">PRICING</div>
+            <h2 className="text-4xl md:text-5xl font-black text-white mb-3">One plan. Everything included.</h2>
+            <p className="text-white/45 text-lg">Billed annually. Pay with USDT TRC20.</p>
+          </ScrollReveal>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Free trial card */}
             <ScrollReveal delay={0}>
               <TiltCard className="rounded-2xl p-7 flex flex-col h-full bg-white/5 border border-white/10">
                 <div className="mb-6">
-                  <p className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-3">Free</p>
+                  <p className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-3">Free Trial</p>
                   <div className="flex items-baseline gap-1 mb-1">
                     <span className="text-5xl font-black text-white">$0</span>
-                    <span className="text-white/40 text-sm">/forever</span>
+                    <span className="text-white/40 text-sm">/ 7 days</span>
                   </div>
-                  <p className="text-white/30 text-xs">No credit card required</p>
+                  <p className="text-white/30 text-xs">No card required</p>
                 </div>
                 <ul className="space-y-3 flex-1 mb-7">
-                  {['Live price feed (4 pairs)', 'USDT TRC20 wallet', 'Closed signal history', 'Community access'].map((f) => (
+                  {['Full platform access', 'Live price feed', 'USDT wallet', 'Signal history', 'Referral link active'].map(f => (
                     <li key={f} className="flex items-center gap-2.5 text-sm">
-                      <svg className="w-4 h-4 flex-shrink-0 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
+                      <svg className="w-4 h-4 flex-shrink-0 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
                       <span className="text-white/55">{f}</span>
-                    </li>
-                  ))}
-                  {['Live active signals', 'Referral commissions'].map((f) => (
-                    <li key={f} className="flex items-center gap-2.5 text-sm">
-                      <svg className="w-4 h-4 flex-shrink-0 text-white/15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-                      <span className="text-white/25 line-through">{f}</span>
                     </li>
                   ))}
                 </ul>
                 <Link href="/auth/register" className="block text-center font-bold py-3.5 rounded-xl transition-all duration-200 hover:scale-105 bg-white/10 hover:bg-white/20 text-white/70">
-                  Start Free
+                  Start Free Trial
                 </Link>
               </TiltCard>
             </ScrollReveal>
 
-            {/* Paid plans from DB */}
-            {plans.map((plan, i) => {
-              const isAnnual = landingBilling === 'annual'
-              const discountMultiplier = 1 - discountPct / 100
-              const displayPrice = isAnnual ? Math.round(plan.price * discountMultiplier) : plan.price
-              const annualTotal = Math.round(plan.price * discountMultiplier) * 12
-              return (
-                <ScrollReveal key={plan.id} delay={(i + 1) * 0.12}>
-                  <TiltCard className="relative rounded-2xl p-7 flex flex-col h-full bg-gradient-to-b from-green-600/80 to-green-900/80 border border-green-400/40 shadow-2xl shadow-green-900/50">
-                    <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-green-400 to-emerald-400 text-green-900 text-xs font-black px-4 py-1 rounded-full shadow-lg whitespace-nowrap">MOST POPULAR</div>
-                    <div className="mb-6">
-                      <p className="text-xs font-semibold text-green-300/70 uppercase tracking-widest mb-3">{plan.name}</p>
-                      <div className="flex items-baseline gap-1 mb-1">
-                        <span className="text-5xl font-black text-white">${displayPrice}</span>
-                        <span className="text-white/40 text-sm">/month</span>
-                      </div>
-                      {isAnnual
-                        ? <p className="text-white/40 text-xs mt-1">Billed as <span className="text-white/70 font-semibold">${annualTotal}/year</span></p>
-                        : <p className="text-white/40 text-xs mt-1">or <span className="text-green-300 font-semibold">${Math.round(plan.price * discountMultiplier)}/mo</span> billed annually</p>
-                      }
+            {/* Pro card — live from DB */}
+            {proPlans.length > 0 ? proPlans.map((plan, i) => (
+              <ScrollReveal key={plan.id} delay={(i + 1) * 0.12}>
+                <TiltCard className="relative rounded-2xl p-7 flex flex-col h-full bg-gradient-to-b from-green-600/80 to-green-900/80 border border-green-400/40 shadow-2xl shadow-green-900/50">
+                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-green-400 to-emerald-400 text-green-900 text-xs font-black px-4 py-1 rounded-full shadow-lg whitespace-nowrap">MOST POPULAR</div>
+                  <div className="mb-6">
+                    <p className="text-xs font-semibold text-green-300/70 uppercase tracking-widest mb-3">{plan.name}</p>
+                    <div className="flex items-baseline gap-1 mb-1">
+                      <span className="text-5xl font-black text-white">${plan.price}</span>
+                      <span className="text-white/40 text-sm">/ month</span>
                     </div>
-                    <ul className="space-y-3 flex-1 mb-7">
-                      {plan.features.map((feat, fi) => (
-                        <li key={fi} className="flex items-center gap-2.5 text-sm">
-                          <svg className="w-4 h-4 flex-shrink-0 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
-                          <span className="text-white/85">{feat}</span>
-                        </li>
-                      ))}
-                    </ul>
-                    <Link href="/auth/register" className="block text-center font-bold py-3.5 rounded-xl transition-all duration-200 hover:scale-105 bg-white text-green-800 hover:bg-gray-100 shadow-lg">
-                      Get {plan.name}
-                    </Link>
-                  </TiltCard>
-                </ScrollReveal>
-              )
-            })}
+                    <p className="text-white/40 text-xs mt-1">
+                      Billed annually — <span className="text-white/70 font-semibold">${annualPrice}/year</span>
+                    </p>
+                  </div>
+                  <ul className="space-y-3 flex-1 mb-7">
+                    {plan.features.map((feat, fi) => (
+                      <li key={fi} className="flex items-center gap-2.5 text-sm">
+                        <svg className="w-4 h-4 flex-shrink-0 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
+                        <span className="text-white/85">{feat}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <Link href="/auth/register" className="block text-center font-bold py-3.5 rounded-xl transition-all duration-200 hover:scale-105 bg-white text-green-800 hover:bg-gray-100 shadow-lg">
+                    Start Free → Upgrade to Pro
+                  </Link>
+                </TiltCard>
+              </ScrollReveal>
+            )) : (
+              /* Fallback if plans not loaded */
+              <ScrollReveal delay={0.12}>
+                <TiltCard className="relative rounded-2xl p-7 flex flex-col h-full bg-gradient-to-b from-green-600/80 to-green-900/80 border border-green-400/40 shadow-2xl shadow-green-900/50">
+                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-green-400 to-emerald-400 text-green-900 text-xs font-black px-4 py-1 rounded-full shadow-lg">MOST POPULAR</div>
+                  <div className="mb-6">
+                    <p className="text-xs font-semibold text-green-300/70 uppercase tracking-widest mb-3">Pro</p>
+                    <div className="flex items-baseline gap-1 mb-1">
+                      <span className="text-5xl font-black text-white">$4</span>
+                      <span className="text-white/40 text-sm">/ month</span>
+                    </div>
+                    <p className="text-white/40 text-xs mt-1">Billed annually — <span className="text-white/70 font-semibold">$48/year</span></p>
+                  </div>
+                  <ul className="space-y-3 flex-1 mb-7">
+                    {['Real-time AI signals', 'Entry, SL & TP on every signal', 'Market analysis included', '7-level referral commissions', 'Priority support'].map((f, fi) => (
+                      <li key={fi} className="flex items-center gap-2.5 text-sm">
+                        <svg className="w-4 h-4 flex-shrink-0 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
+                        <span className="text-white/85">{f}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <Link href="/auth/register" className="block text-center font-bold py-3.5 rounded-xl transition-all duration-200 hover:scale-105 bg-white text-green-800 hover:bg-gray-100 shadow-lg">
+                    Start Free → Upgrade to Pro
+                  </Link>
+                </TiltCard>
+              </ScrollReveal>
+            )}
           </div>
         </div>
       </section>
 
-      {/* ── Referral Banner ── */}
+      {/* ── CTA Banner ── */}
       <section className="py-16 px-6">
         <div className="max-w-4xl mx-auto">
           <ScrollReveal>
             <TiltCard className="relative bg-gradient-to-r from-green-900/60 to-emerald-900/40 border border-green-500/30 rounded-3xl p-12 text-center overflow-hidden cursor-default">
               <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: 'linear-gradient(#22c55e 1px, transparent 1px), linear-gradient(90deg, #22c55e 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
               <div className="relative z-10">
-                <div className="text-5xl mb-5">🎁</div>
-                <h2 className="text-3xl md:text-4xl font-black text-white mb-3">Earn While You Trade</h2>
-                <p className="text-white/55 text-lg mb-8 max-w-xl mx-auto">Pro subscribers get a unique referral link. Every time someone in your network pays, you earn — automatically, across multiple levels.</p>
+                <div className="text-5xl mb-5">🚀</div>
+                <h2 className="text-3xl md:text-4xl font-black text-white mb-3">Start free. Build your network. Get paid.</h2>
+                <p className="text-white/55 text-lg mb-3 max-w-xl mx-auto">
+                  Your referral link is active from the first day of your trial. Every signup under you is a pending commission — waiting for you to upgrade and collect.
+                </p>
+                <p className="text-green-400 font-bold text-sm mb-8">7-day free trial · No credit card · USDT payouts</p>
                 <Link href="/auth/register" className="inline-block bg-gradient-to-r from-green-500 to-green-700 hover:from-green-400 hover:to-green-600 text-white font-bold px-10 py-4 rounded-2xl transition-all duration-300 hover:scale-110 shadow-xl shadow-green-900/40">
-                  Start Earning Now →
+                  Join Free Now →
                 </Link>
               </div>
             </TiltCard>
@@ -542,7 +580,7 @@ export default function LandingPage() {
           </div>
           <div className="border-t border-white/5 pt-5">
             <p className="text-white/20 text-xs text-center leading-relaxed max-w-3xl mx-auto">
-              <span className="font-semibold text-white/30">Risk Disclaimer:</span> Trading forex and gold involves substantial risk of loss and is not suitable for all investors. Past performance of signals is not indicative of future results. SignalFX Pro provides signals for informational purposes only and does not constitute financial advice. Never trade with money you cannot afford to lose. Please consult a licensed financial advisor before making any investment decisions.
+              <span className="font-semibold text-white/30">Risk Disclaimer:</span> Trading forex and gold involves substantial risk of loss and is not suitable for all investors. Past performance of signals is not indicative of future results. SignalFX Pro provides signals for informational purposes only and does not constitute financial advice. Never trade with money you cannot afford to lose.
             </p>
           </div>
         </div>
