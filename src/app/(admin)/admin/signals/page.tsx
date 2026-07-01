@@ -33,7 +33,7 @@ export default async function AdminSignalsPage() {
         subtitle={`${signals.length} signals total`}
         actions={
           <div className="flex items-center gap-2">
-            {signals.length === 0 && <SeedSignalsButton />}
+            <SeedSignalsButton hasExisting={signals.length > 0} />
             <Link href="/admin/signals/new">
               <Button className="bg-brand-700 hover:bg-brand-800 text-white">New Signal</Button>
             </Link>
