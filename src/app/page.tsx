@@ -41,7 +41,6 @@ const PRO_FEATURES = [
   { icon: '🏆', title: 'Priority Support',       desc: 'Dedicated support tickets with faster response times for Pro members.' },
 ]
 
-type LivePlan = { id: string; name: string; price: number; features: string[] }
 
 /* ─── helpers ─── */
 const ease = [0.25, 0.46, 0.45, 0.94] as const
@@ -105,18 +104,6 @@ export default function LandingPage() {
   const [scrolled, setScrolled]   = useState(false)
   const [ticker, setTicker]       = useState(TICKER_FALLBACK)
   const [loggedIn, setLoggedIn]   = useState(false)
-  const [plans, setPlans]         = useState<LivePlan[]>([])
-
-  useEffect(() => {
-    fetch('/api/plans').then(r => r.json()).then(j => {
-      if (j.success && Array.isArray(j.data)) {
-        setPlans(j.data.map((p: { id: string; name: string; price: number | string; features: unknown }) => ({
-          id: p.id, name: p.name, price: Number(p.price),
-          features: Array.isArray(p.features) ? p.features as string[] : [],
-        })))
-      }
-    }).catch(() => {})
-  }, [])
 
   useEffect(() => {
     createClient().auth.getUser().then(({ data }) => { if (data.user) setLoggedIn(true) })
