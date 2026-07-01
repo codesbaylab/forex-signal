@@ -313,6 +313,8 @@ export async function POST(request: Request) {
         publishedAt: s.publishedAt,
         closedAt: s.closedAt,
         createdBy: admin.id,
+        createdAt: s.publishedAt ?? new Date(),
+        updatedAt: s.closedAt ?? s.publishedAt ?? new Date(),
       })),
     })
 
