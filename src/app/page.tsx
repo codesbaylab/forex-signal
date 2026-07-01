@@ -26,15 +26,6 @@ const STATS = [
   { value: '100%',   label: 'Paid to Network' },
 ]
 
-const COMMISSION_LEVELS = [
-  { level: 'L1', label: 'Direct Referral', pct: 35 },
-  { level: 'L2', label: 'Level 2',         pct: 20 },
-  { level: 'L3', label: 'Level 3',         pct: 15 },
-  { level: 'L4', label: 'Level 4',         pct: 12 },
-  { level: 'L5', label: 'Level 5',         pct: 8  },
-  { level: 'L6', label: 'Level 6',         pct: 6  },
-  { level: 'L7', label: 'Level 7',         pct: 4  },
-]
 
 const FREE_FEATURES = [
   { icon: '📡', title: 'Live Price Feed',   desc: 'XAU/USD, EUR/USD, GBP/USD & USD/JPY updated every 5 minutes.' },
@@ -158,7 +149,6 @@ export default function LandingPage() {
   const doubled = [...ticker, ...ticker]
 
   const proPlans = plans.filter(p => p.price > 0)
-  const annualPrice = proPlans[0] ? proPlans[0].price * 12 : 48
 
   return (
     <div className="min-h-screen bg-[#050f09] text-white overflow-x-hidden">
