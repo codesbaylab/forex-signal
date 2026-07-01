@@ -183,6 +183,12 @@ async def handle_list_tools() -> list[types.Tool]:
                         "description": "Hours the limit order remains valid (default 6)",
                         "default": 6
                     },
+                    "timeframe": {
+                        "type": "string",
+                        "enum": ["M15", "H1", "H4", "D1"],
+                        "description": "Chart timeframe the signal is based on (default H4)",
+                        "default": "H4"
+                    },
                     "analysis": {
                         "type": "string",
                         "description": "Brief explanation: H4 bias, session swept, wick size, OB location"
@@ -527,6 +533,7 @@ async def handle_call_tool(name: str, arguments: dict) -> list[types.TextContent
         tp          = float(arguments["tp"])
         session     = arguments.get("session", "")
         valid_hours = int(arguments.get("valid_hours", 6))
+        timeframe   = arguments.get("timeframe", "H4")
         analysis    = arguments.get("analysis", "")
 
         risk   = abs(entry - sl)
@@ -548,7 +555,7 @@ async def handle_call_tool(name: str, arguments: dict) -> list[types.TextContent
             "entryPrice":  entry,
             "stopLoss":    sl,
             "takeProfits": [{"level": 1, "price": tp}],
-            "timeframe":   "H1",
+            "timeframe":   timeframe,
             "analysis":    full_analysis,
             "planAccess":  [],
             "publishNow":  True,
