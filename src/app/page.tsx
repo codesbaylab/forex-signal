@@ -45,7 +45,7 @@ const FREE_FEATURES = [
 
 const PRO_FEATURES = [
   { icon: '⚡', title: 'Live AI Signals',        desc: 'Real-time BUY/SELL alerts with entry, TP and SL the moment they are published.' },
-  { icon: '💰', title: '7-Level Commissions',    desc: 'Earn from every paid subscriber in your network — 7 levels deep, automatically.' },
+  { icon: '💰', title: 'Referral Rewards',        desc: 'Earn commissions automatically when the people you invite subscribe to the platform.' },
   { icon: '📊', title: 'Full Trade Analysis',    desc: 'Every signal comes with market structure bias, session context and risk/reward breakdown.' },
   { icon: '🏆', title: 'Priority Support',       desc: 'Dedicated support tickets with faster response times for Pro members.' },
 ]
@@ -264,7 +264,7 @@ export default function LandingPage() {
           >
             AI Signals.
             <span className="block bg-gradient-to-r from-green-400 via-emerald-300 to-green-500 bg-clip-text text-transparent animate-gradient-x">
-              Unlimited Income.
+              Earn While You Trade.
             </span>
           </motion.h1>
 
@@ -273,7 +273,7 @@ export default function LandingPage() {
             initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4, ease }}
           >
-            Get daily Gold trade signals with entry, stop loss and take profit — and earn from every person in your network who subscribes, across <strong className="text-white/80">7 levels deep</strong>.
+            Get daily Gold trade signals with entry, stop loss and take profit — and earn referral rewards every time someone you invite subscribes.
           </motion.p>
 
           <motion.div
@@ -397,147 +397,58 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── Commission Structure ── */}
+      {/* ── Referral Rewards ── */}
       <section id="commissions" className="py-24 px-6">
         <div className="max-w-4xl mx-auto">
           <ScrollReveal className="text-center mb-14">
-            <div className="inline-block bg-green-500/10 border border-green-500/20 text-green-400 text-xs font-bold px-3 py-1 rounded-full mb-4">REFERRAL PROGRAM</div>
-            <h2 className="text-4xl md:text-5xl font-black text-white mb-3">Earn from 7 levels deep</h2>
+            <div className="inline-block bg-green-500/10 border border-green-500/20 text-green-400 text-xs font-bold px-3 py-1 rounded-full mb-4">REFERRAL REWARDS</div>
+            <h2 className="text-4xl md:text-5xl font-black text-white mb-3">Share & earn on every subscription</h2>
             <p className="text-white/45 text-lg max-w-xl mx-auto">
-              100% of every subscription fee flows back to the network. You earn from everyone your referrals bring in — down 7 levels.
+              Invite friends. When they subscribe, you earn a commission — automatically paid to your USDT wallet.
             </p>
           </ScrollReveal>
 
           <ScrollReveal delay={0.1}>
-            <div className="bg-white/5 border border-white/10 rounded-3xl p-8 mb-8">
-              <div className="grid grid-cols-7 gap-3 mb-6">
-                {COMMISSION_LEVELS.map((lvl, i) => (
-                  <div key={lvl.level} className="text-center">
-                    <div className={`rounded-2xl py-4 mb-2 ${i === 0 ? 'bg-green-500/30 border border-green-500/50' : 'bg-white/5 border border-white/10'}`}>
-                      <p className="text-xs font-bold text-green-400 mb-1">{lvl.level}</p>
-                      <p className={`font-extrabold ${i === 0 ? 'text-2xl text-white' : 'text-xl text-white/80'}`}>{lvl.pct}%</p>
-                    </div>
-                    <p className="text-white/30 text-xs hidden md:block">{lvl.label}</p>
-                  </div>
-                ))}
-              </div>
-              <div className="border-t border-white/10 pt-6">
-                <p className="text-center text-white/40 text-sm">
-                  Example: 5 direct referrals × 5 each = <span className="text-white/70 font-semibold">3,125 people at Level 3</span> — each paying $48/yr = <span className="text-green-400 font-bold">${(3125 * 48 * 0.15).toLocaleString()} from L3 alone</span>
-                </p>
-              </div>
-            </div>
-          </ScrollReveal>
-
-          <ScrollReveal delay={0.2}>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
               {[
-                { icon: '🔗', title: 'Link Active on Day 1', desc: 'Start referring during your free trial. Commissions are held and paid out the moment you upgrade.' },
-                { icon: '⚡', title: 'Instant Payouts', desc: 'Commissions go straight to your USDT wallet when someone in your network subscribes.' },
-                { icon: '♾️', title: 'Passive Forever', desc: 'Annual renewals pay commission again. Build once, earn every year.' },
+                { icon: '🔗', title: 'Link Active on Day 1', desc: 'Your referral link works from the first day of your free trial. Start sharing immediately.' },
+                { icon: '⚡', title: 'Auto USDT Payouts',   desc: 'Commissions are paid directly to your USDT wallet the moment your referral subscribes.' },
+                { icon: '♾️', title: 'Earn Every Renewal',  desc: 'When your referrals renew annually, you earn again. Build once, earn every year.' },
               ].map(item => (
-                <div key={item.title} className="bg-white/5 border border-white/10 rounded-2xl p-5">
-                  <div className="text-3xl mb-3">{item.icon}</div>
-                  <p className="font-bold text-white text-sm mb-1">{item.title}</p>
+                <div key={item.title} className="bg-white/5 border border-white/10 rounded-2xl p-6 text-center">
+                  <div className="text-4xl mb-4">{item.icon}</div>
+                  <p className="font-bold text-white text-sm mb-2">{item.title}</p>
                   <p className="text-white/40 text-xs leading-relaxed">{item.desc}</p>
                 </div>
               ))}
             </div>
           </ScrollReveal>
+
+          <ScrollReveal delay={0.2}>
+            <div className="bg-gradient-to-r from-green-900/40 to-emerald-900/30 border border-green-500/20 rounded-2xl p-6 text-center">
+              <p className="text-white/50 text-sm mb-1">Example payout on a single referral</p>
+              <p className="text-3xl font-black text-white mb-1">$16.80 <span className="text-green-400">USDT</span></p>
+              <p className="text-white/30 text-xs">35% of $48/year subscription · paid instantly</p>
+            </div>
+          </ScrollReveal>
         </div>
       </section>
 
-      {/* ── Pricing ── */}
-      <section id="pricing" className="py-24 px-6 border-t border-white/5 bg-white/[0.015]">
-        <div className="max-w-3xl mx-auto">
-          <ScrollReveal className="text-center mb-10">
-            <div className="inline-block bg-green-500/10 border border-green-500/20 text-green-400 text-xs font-bold px-3 py-1 rounded-full mb-4">PRICING</div>
-            <h2 className="text-4xl md:text-5xl font-black text-white mb-3">One plan. Everything included.</h2>
-            <p className="text-white/45 text-lg">Billed annually. Pay with USDT TRC20.</p>
+      {/* ── Pricing simple strip ── */}
+      <section id="pricing" className="py-16 px-6 border-t border-white/5 bg-white/[0.015]">
+        <div className="max-w-2xl mx-auto text-center">
+          <ScrollReveal>
+            <div className="inline-block bg-green-500/10 border border-green-500/20 text-green-400 text-xs font-bold px-3 py-1 rounded-full mb-6">PRICING</div>
+            <div className="flex items-baseline justify-center gap-2 mb-2">
+              <span className="text-6xl font-black text-white">$4</span>
+              <span className="text-white/40 text-xl">/ month</span>
+            </div>
+            <p className="text-white/40 text-sm mb-8">Billed annually — $48/year · Pay with USDT TRC20 · Cancel anytime</p>
+            <Link href="/auth/register" className="inline-block bg-gradient-to-r from-green-500 to-green-700 hover:from-green-400 hover:to-green-600 text-white font-bold px-12 py-4 rounded-2xl text-base shadow-xl shadow-green-900/50 transition-all duration-300 hover:scale-110">
+              Start Free — 7 Days Trial →
+            </Link>
+            <p className="text-white/20 text-xs mt-4">No credit card required during trial</p>
           </ScrollReveal>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Free trial card */}
-            <ScrollReveal delay={0}>
-              <TiltCard className="rounded-2xl p-7 flex flex-col h-full bg-white/5 border border-white/10">
-                <div className="mb-6">
-                  <p className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-3">Free Trial</p>
-                  <div className="flex items-baseline gap-1 mb-1">
-                    <span className="text-5xl font-black text-white">$0</span>
-                    <span className="text-white/40 text-sm">/ 7 days</span>
-                  </div>
-                  <p className="text-white/30 text-xs">No card required</p>
-                </div>
-                <ul className="space-y-3 flex-1 mb-7">
-                  {['Full platform access', 'Live price feed', 'USDT wallet', 'Signal history', 'Referral link active'].map(f => (
-                    <li key={f} className="flex items-center gap-2.5 text-sm">
-                      <svg className="w-4 h-4 flex-shrink-0 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
-                      <span className="text-white/55">{f}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Link href="/auth/register" className="block text-center font-bold py-3.5 rounded-xl transition-all duration-200 hover:scale-105 bg-white/10 hover:bg-white/20 text-white/70">
-                  Start Free Trial
-                </Link>
-              </TiltCard>
-            </ScrollReveal>
-
-            {/* Pro card — live from DB */}
-            {proPlans.length > 0 ? proPlans.map((plan, i) => (
-              <ScrollReveal key={plan.id} delay={(i + 1) * 0.12}>
-                <TiltCard className="relative rounded-2xl p-7 flex flex-col h-full bg-gradient-to-b from-green-600/80 to-green-900/80 border border-green-400/40 shadow-2xl shadow-green-900/50">
-                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-green-400 to-emerald-400 text-green-900 text-xs font-black px-4 py-1 rounded-full shadow-lg whitespace-nowrap">MOST POPULAR</div>
-                  <div className="mb-6">
-                    <p className="text-xs font-semibold text-green-300/70 uppercase tracking-widest mb-3">{plan.name}</p>
-                    <div className="flex items-baseline gap-1 mb-1">
-                      <span className="text-5xl font-black text-white">${plan.price}</span>
-                      <span className="text-white/40 text-sm">/ month</span>
-                    </div>
-                    <p className="text-white/40 text-xs mt-1">
-                      Billed annually — <span className="text-white/70 font-semibold">${annualPrice}/year</span>
-                    </p>
-                  </div>
-                  <ul className="space-y-3 flex-1 mb-7">
-                    {plan.features.map((feat, fi) => (
-                      <li key={fi} className="flex items-center gap-2.5 text-sm">
-                        <svg className="w-4 h-4 flex-shrink-0 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
-                        <span className="text-white/85">{feat}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <Link href="/auth/register" className="block text-center font-bold py-3.5 rounded-xl transition-all duration-200 hover:scale-105 bg-white text-green-800 hover:bg-gray-100 shadow-lg">
-                    Start Free → Upgrade to Pro
-                  </Link>
-                </TiltCard>
-              </ScrollReveal>
-            )) : (
-              /* Fallback if plans not loaded */
-              <ScrollReveal delay={0.12}>
-                <TiltCard className="relative rounded-2xl p-7 flex flex-col h-full bg-gradient-to-b from-green-600/80 to-green-900/80 border border-green-400/40 shadow-2xl shadow-green-900/50">
-                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-green-400 to-emerald-400 text-green-900 text-xs font-black px-4 py-1 rounded-full shadow-lg">MOST POPULAR</div>
-                  <div className="mb-6">
-                    <p className="text-xs font-semibold text-green-300/70 uppercase tracking-widest mb-3">Pro</p>
-                    <div className="flex items-baseline gap-1 mb-1">
-                      <span className="text-5xl font-black text-white">$4</span>
-                      <span className="text-white/40 text-sm">/ month</span>
-                    </div>
-                    <p className="text-white/40 text-xs mt-1">Billed annually — <span className="text-white/70 font-semibold">$48/year</span></p>
-                  </div>
-                  <ul className="space-y-3 flex-1 mb-7">
-                    {['Real-time AI signals', 'Entry, SL & TP on every signal', 'Market analysis included', '7-level referral commissions', 'Priority support'].map((f, fi) => (
-                      <li key={fi} className="flex items-center gap-2.5 text-sm">
-                        <svg className="w-4 h-4 flex-shrink-0 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
-                        <span className="text-white/85">{f}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <Link href="/auth/register" className="block text-center font-bold py-3.5 rounded-xl transition-all duration-200 hover:scale-105 bg-white text-green-800 hover:bg-gray-100 shadow-lg">
-                    Start Free → Upgrade to Pro
-                  </Link>
-                </TiltCard>
-              </ScrollReveal>
-            )}
-          </div>
         </div>
       </section>
 
